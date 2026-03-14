@@ -5,6 +5,11 @@ plugins {
 dependencies {
     api(project(":hrms-platform:hrms-starter-tenancy"))
     implementation(project(":hrms-platform:hrms-starter-error"))
+    implementation(project(":hrms-platform:hrms-audit"))
     implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
-    implementation("org.springframework:spring-web")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("io.projectreactor:reactor-test")
 }
