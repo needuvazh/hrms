@@ -25,12 +25,14 @@ import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
+@Primary
 public class AttendanceApplicationService implements AttendanceModuleApi {
 
     private final AttendanceRepository attendanceRepository;

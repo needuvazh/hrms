@@ -1,7 +1,7 @@
 package com.company.hrms.employee.application;
 
 import com.company.hrms.attendance.api.AssignShiftCommand;
-import com.company.hrms.attendance.api.AttendanceModuleApi;
+import com.company.hrms.attendance.api.AttendanceModuleClient;
 import com.company.hrms.attendance.api.AttendanceQuery;
 import com.company.hrms.attendance.api.AttendanceRecordView;
 import com.company.hrms.attendance.api.CreateShiftCommand;
@@ -259,7 +259,7 @@ class EmployeeOnboardingServiceTest {
         }
     }
 
-    static class StubAttendanceApi implements AttendanceModuleApi {
+    static class StubAttendanceApi implements AttendanceModuleClient {
         private final boolean shouldFail;
 
         StubAttendanceApi(boolean shouldFail) {

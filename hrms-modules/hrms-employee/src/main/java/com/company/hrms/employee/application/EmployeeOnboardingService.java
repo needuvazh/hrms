@@ -22,7 +22,7 @@ import com.company.hrms.platform.audit.api.AuditEventPublisher;
 import com.company.hrms.platform.starter.error.exception.HrmsException;
 import com.company.hrms.platform.starter.tenancy.api.TenantContextAccessor;
 import com.company.hrms.attendance.api.AssignShiftCommand;
-import com.company.hrms.attendance.api.AttendanceModuleApi;
+import com.company.hrms.attendance.api.AttendanceModuleClient;
 import com.company.hrms.workflow.api.StartWorkflowCommand;
 import com.company.hrms.workflow.api.WorkflowModuleApi;
 import java.time.Instant;
@@ -46,7 +46,7 @@ public class EmployeeOnboardingService implements EmployeeOnboardingApi {
     private final EmployeeModuleApi employeeModuleApi;
     private final AuthModuleApi authModuleApi;
     private final LeaveModuleApi leaveModuleApi;
-    private final AttendanceModuleApi attendanceModuleApi;
+    private final AttendanceModuleClient attendanceModuleClient;
     private final WorkflowModuleApi workflowModuleApi;
     private final NotificationModuleApi notificationModuleApi;
     private final DocumentModuleApi documentModuleApi;
@@ -57,7 +57,7 @@ public class EmployeeOnboardingService implements EmployeeOnboardingApi {
             EmployeeModuleApi employeeModuleApi,
             AuthModuleApi authModuleApi,
             LeaveModuleApi leaveModuleApi,
-            AttendanceModuleApi attendanceModuleApi,
+            AttendanceModuleClient attendanceModuleClient,
             WorkflowModuleApi workflowModuleApi,
             NotificationModuleApi notificationModuleApi,
             DocumentModuleApi documentModuleApi,
@@ -67,7 +67,7 @@ public class EmployeeOnboardingService implements EmployeeOnboardingApi {
         this.employeeModuleApi = employeeModuleApi;
         this.authModuleApi = authModuleApi;
         this.leaveModuleApi = leaveModuleApi;
-        this.attendanceModuleApi = attendanceModuleApi;
+        this.attendanceModuleClient = attendanceModuleClient;
         this.workflowModuleApi = workflowModuleApi;
         this.notificationModuleApi = notificationModuleApi;
         this.documentModuleApi = documentModuleApi;
@@ -199,7 +199,7 @@ public class EmployeeOnboardingService implements EmployeeOnboardingApi {
                 employee.id(),
                 steps,
                 "ATTENDANCE_SETUP",
-                attendanceModuleApi.assignShift(new AssignShiftCommand(
+                attendanceModuleClient.assignShift(new AssignShiftCommand(
                                 employee.id(),
                                 setup.shiftId(),
                                 effectiveFrom,

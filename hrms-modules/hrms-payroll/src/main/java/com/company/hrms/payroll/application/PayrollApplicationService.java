@@ -48,12 +48,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import org.springframework.http.HttpStatus;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
+@Primary
 public class PayrollApplicationService implements PayrollModuleApi {
 
     private static final String PAYROLL_WORKFLOW_KEY = "payroll.approval";
