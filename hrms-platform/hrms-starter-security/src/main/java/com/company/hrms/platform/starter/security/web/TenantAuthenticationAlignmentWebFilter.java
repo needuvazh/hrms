@@ -22,7 +22,7 @@ public class TenantAuthenticationAlignmentWebFilter implements WebFilter {
                 .cast(JwtAuthenticationToken.class)
                 .map(JwtAuthenticationToken::getToken)
                 .map(jwt -> jwt.getClaimAsString("tenant"))
-                .defaultIfEmpty(requestTenant)
+                .switchIfEmpty(Mono.justOrEmpty(requestTenant))
                 .flatMap(tokenTenant -> {
                     if (StringUtils.hasText(requestTenant)
                             && StringUtils.hasText(tokenTenant)

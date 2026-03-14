@@ -2,12 +2,12 @@ spring:
   application:
     name: hrms-app-integration
   r2dbc:
-    url: ${HRMS_R2DBC_URL:r2dbc:postgresql://localhost:5432/hrms}
+    url: ${HRMS_R2DBC_URL:r2dbc:postgresql://localhost:5433/hrms}
     username: ${HRMS_DB_USERNAME:hrms}
     password: ${HRMS_DB_PASSWORD:hrms}
   flyway:
     enabled: true
-    url: ${HRMS_JDBC_URL:jdbc:postgresql://localhost:5432/hrms}
+    url: ${HRMS_JDBC_URL:jdbc:postgresql://localhost:5433/hrms}
     user: ${HRMS_DB_USERNAME:hrms}
     password: ${HRMS_DB_PASSWORD:hrms}
     locations:
