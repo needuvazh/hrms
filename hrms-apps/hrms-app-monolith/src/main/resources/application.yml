@@ -30,6 +30,14 @@ spring:
       - classpath:db/migration/integration-hub
 
 hrms:
+  web:
+    cors:
+      enabled: ${HRMS_WEB_CORS_ENABLED:true}
+      allowed-origin-patterns: ${HRMS_WEB_CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*}
+      allowed-methods: ${HRMS_WEB_CORS_ALLOWED_METHODS:GET,POST,PUT,PATCH,DELETE,OPTIONS}
+      allowed-headers: ${HRMS_WEB_CORS_ALLOWED_HEADERS:Content-Type,Authorization,X-Tenant-Id,X-Tenant-Key}
+      exposed-headers: ${HRMS_WEB_CORS_EXPOSED_HEADERS:Authorization}
+      allow-credentials: ${HRMS_WEB_CORS_ALLOW_CREDENTIALS:true}
   security:
     jwt:
       issuer: ${HRMS_JWT_ISSUER:hrms-monolith}

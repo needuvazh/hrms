@@ -84,9 +84,11 @@ public class ReferenceMasterR2dbcRepository implements ReferenceMasterRepository
         sql.append(" LIMIT :limit OFFSET :offset");
 
         GenericExecuteSpec spec = databaseClient.sql(sql.toString())
-                .bind("q", likeQuery)
                 .bind("limit", query.size())
                 .bind("offset", query.page() * query.size());
+        if (StringUtils.hasText(query.q())) {
+            spec = spec.bind("q", likeQuery);
+        }
         if (query.active() != null) {
             spec = spec.bind("active", query.active());
         }
@@ -119,7 +121,10 @@ public class ReferenceMasterR2dbcRepository implements ReferenceMasterRepository
         if (resource == ReferenceResource.SKILLS && query.skillCategoryId() != null) {
             sql.append(" AND t.skill_category_id = :skillCategoryId");
         }
-        GenericExecuteSpec spec = databaseClient.sql(sql.toString()).bind("q", likeQuery);
+        GenericExecuteSpec spec = databaseClient.sql(sql.toString());
+        if (StringUtils.hasText(query.q())) {
+            spec = spec.bind("q", likeQuery);
+        }
         if (query.active() != null) {
             spec = spec.bind("active", query.active());
         }

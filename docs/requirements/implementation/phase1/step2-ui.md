@@ -6,6 +6,186 @@ Step 2 — Global Reference Masters
 
 These are reusable platform-wide masters used across the whole HRMS.
 
+Created endpoint base is dynamic:
+- /api/reference/{resource}
+- resource values:
+  - countries
+  - currencies
+  - languages
+  - nationalities
+  - religions
+  - genders
+  - marital-statuses
+  - relationship-types
+  - document-types
+  - education-levels
+  - certification-types
+  - skill-categories
+  - skills
+I also used existing auth API for testing:
+- POST /api/v1/auth/login
+---
+1) Login (used for all secured calls)
+- Request
+POST /api/v1/auth/login
+Content-Type: application/json
+{
+  "username": "admin",
+  "password": "admin"
+}
+- Response (200)
+{
+  "accessToken": "<jwt>",
+  "tokenType": "Bearer",
+  "expiresIn": 3600,
+  "user": {
+    "id": "8e2dffb8-26ad-4a89-bc84-f397f9772112",
+    "username": "admin",
+    "superAdmin": true,
+    "canViewAllTenants": true,
+    "roles": ["SUPER_ADMIN"]
+  }
+}
+---
+2) Create reference
+- Request
+POST /api/reference/{resource}
+Authorization: Bearer <jwt>
+Content-Type: application/json
+{
+  "code": "OMR",
+  "name": "Omani Rial",
+  "shortName": "OMR",
+  "decimalPlaces": 3,
+  "active": true
+}
+- Response (200)
+{
+  "id": "7898876a-7911-4d32-add8-c868edc217e9",
+  "code": "OMR",
+  "name": "Omani Rial",
+  "shortName": "OMR",
+  "decimalPlaces": 3,
+  "active": true,
+  "createdBy": "system",
+  "updatedBy": "system",
+  "createdAt": "2026-03-14T18:29:09.577308Z",
+  "updatedAt": "2026-03-14T18:29:09.577308Z"
+}
+---
+3) List reference (paged/search/sort/filter)
+- Request
+GET /api/reference/{resource}?q=java&active=true&page=0&size=10&sort=updated_at,desc
+Authorization: Bearer <jwt>
+- For skills:
+GET /api/reference/skills?q=java&page=0&size=10&sort=skill_name,asc&skillCategoryId=<uuid>
+- Response (200)
+{
+  "items": [
+    {
+      "id": "794740d9-afd9-433b-a786-20829af3dbd2",
+      "code": "JAVA",
+      "name": "Java",
+      "skillCategoryId": "11ee625f-62ae-41e7-b7d4-422e223caf93",
+      "skillCategoryName": "Technical",
+      "active": true
+    }
+  ],
+  "page": 0,
+  "size": 10,
+  "totalElements": 1,
+  "totalPages": 1
+}
+---
+4) Get by id
+- Request
+GET /api/reference/{resource}/{id}
+Authorization: Bearer <jwt>
+- Response (200)
+{
+  "id": "576f6f78-53b7-4198-ad39-acfb5f855c2f",
+  "code": "OM",
+  "name": "Oman",
+  "iso2Code": "OM",
+  "iso3Code": "OMN",
+  "defaultCurrencyCode": "OMR",
+  "active": true
+}
+- Not found (404)
+{
+  "errorCode": "REFERENCE_NOT_FOUND",
+  "message": "Reference record not found"
+}
+---
+5) Update by id
+- Request
+PUT /api/reference/{resource}/{id}
+Authorization: Bearer <jwt>
+Content-Type: application/json
+{
+  "code": "OM",
+  "name": "Sultanate of Oman",
+  "iso2Code": "OM",
+  "iso3Code": "OMN",
+  "defaultCurrencyCode": "OMR",
+  "active": true
+}
+- Response (200)
+{
+  "id": "576f6f78-53b7-4198-ad39-acfb5f855c2f",
+  "code": "OM",
+  "name": "Sultanate of Oman",
+  "active": true,
+  "updatedBy": "system"
+}
+---
+6) Status change
+- Request
+PATCH /api/reference/{resource}/{id}/status
+Authorization: Bearer <jwt>
+Content-Type: application/json
+{
+  "active": false
+}
+- Response (200)  
+Empty body.
+---
+7) Options/dropdown
+- Request
+GET /api/reference/{resource}/options
+Authorization: Bearer <jwt>
+- optional:
+GET /api/reference/{resource}/options?activeOnly=false
+- Response (200)
+[
+  {
+    "id": "7898876a-7911-4d32-add8-c868edc217e9",
+    "code": "OMR",
+    "name": "Omani Rial"
+  }
+]
+---
+8) Document type business-rule validation (implemented + verified)
+- Invalid request
+POST /api/reference/document-types
+Authorization: Bearer <jwt>
+Content-Type: application/json
+{
+  "code": "NID",
+  "name": "National ID",
+  "documentFor": "EMPLOYEE",
+  "issueDateRequired": true,
+  "expiryDateRequired": true,
+  "alertRequired": false,
+  "alertDaysBefore": 15,
+  "active": true
+}
+- Response (400)
+{
+  "errorCode": "INVALID_ALERT_CONFIGURATION",
+  "message": "Alert days cannot be positive when alert is disabled"
+}
+
 --------------------------------------------------
 SCOPE
 --------------------------------------------------

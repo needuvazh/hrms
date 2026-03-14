@@ -5,10 +5,16 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import java.time.Clock;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsWebFilter;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 @AutoConfiguration
+@EnableConfigurationProperties(WebfluxCorsProperties.class)
 public class WebfluxStarterAutoConfiguration {
 
     @Bean
@@ -28,6 +34,22 @@ public class WebfluxStarterAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnProperty(prefix = "hrms.web.cors", name = "enabled", havingValue = "true", matchIfMissing = true)
+    CorsWebFilter hrmsCorsWebFilter(WebfluxCorsProperties corsProperties) {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(corsProperties.getAllowedOriginPatterns());
+        configuration.setAllowedMethods(corsProperties.getAllowedMethods());
+        configuration.setAllowedHeaders(corsProperties.getAllowedHeaders());
+        configuration.setExposedHeaders(corsProperties.getExposedHeaders());
+        configuration.setAllowCredentials(corsProperties.isAllowCredentials());
+        configuration.setMaxAge(corsProperties.getMaxAge());
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/**", configuration);
+        return new CorsWebFilter(source);
+    }
+
+    @Bean
     GroupedOpenApi tenantModuleOpenApi() {
         return moduleGroup("tenant", "com.company.hrms.tenant.controller");
     }
@@ -39,7 +61,10 @@ public class WebfluxStarterAutoConfiguration {
 
     @Bean
     GroupedOpenApi masterDataModuleOpenApi() {
-        return moduleGroup("master-data", "com.company.hrms.masterdata.controller");
+        return moduleGroup(
+                "master-data",
+                "com.company.hrms.masterdata.controller",
+                "com.company.hrms.masterdata.reference.interfaces.rest");
     }
 
     @Bean
@@ -107,10 +132,10 @@ public class WebfluxStarterAutoConfiguration {
         return moduleGroup("document", "com.company.hrms.document.controller");
     }
 
-    private GroupedOpenApi moduleGroup(String groupName, String packageToScan) {
+    private GroupedOpenApi moduleGroup(String groupName, String... packagesToScan) {
         return GroupedOpenApi.builder()
                 .group(groupName)
-                .packagesToScan(packageToScan)
+                .packagesToScan(packagesToScan)
                 .build();
     }
 }
