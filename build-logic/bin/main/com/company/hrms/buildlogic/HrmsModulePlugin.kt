@@ -17,5 +17,6 @@ class HrmsModulePlugin : Plugin<Project> {
         }
 
         project.dependencies.add("compileOnly", "io.swagger.core.v3:swagger-annotations-jakarta:2.2.22")
+        project.dependencies.add("compileOnly", "com.fasterxml.jackson.core:jackson-annotations")
     }
 }

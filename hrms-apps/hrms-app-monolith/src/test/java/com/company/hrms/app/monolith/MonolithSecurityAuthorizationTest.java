@@ -1,21 +1,21 @@
 package com.company.hrms.app.monolith;
 
 import com.company.hrms.app.monolith.config.MonolithSecurityPolicyConfiguration;
-import com.company.hrms.employee.api.EmployeeModuleApi;
-import com.company.hrms.employee.api.EmployeeSearchQuery;
-import com.company.hrms.employee.api.EmployeeView;
-import com.company.hrms.employee.infrastructure.web.EmployeeController;
-import com.company.hrms.person.api.PersonModuleApi;
-import com.company.hrms.person.api.PersonSearchQuery;
-import com.company.hrms.person.api.PersonView;
-import com.company.hrms.person.infrastructure.web.PersonController;
+import com.company.hrms.employee.service.EmployeeModuleApi;
+import com.company.hrms.employee.model.EmployeeSearchQueryDto;
+import com.company.hrms.employee.model.EmployeeViewDto;
+import com.company.hrms.employee.controller.EmployeeController;
+import com.company.hrms.person.service.PersonModuleApi;
+import com.company.hrms.person.model.PersonSearchQueryDto;
+import com.company.hrms.person.model.PersonViewDto;
+import com.company.hrms.person.controller.PersonController;
 import com.company.hrms.platform.starter.security.api.JwtTokenClaims;
 import com.company.hrms.platform.starter.security.api.JwtTokenService;
-import com.company.hrms.recruitment.api.CandidateSearchQuery;
-import com.company.hrms.recruitment.api.CandidateStatus;
-import com.company.hrms.recruitment.api.CandidateView;
-import com.company.hrms.recruitment.api.RecruitmentModuleApi;
-import com.company.hrms.recruitment.infrastructure.web.RecruitmentController;
+import com.company.hrms.recruitment.model.CandidateSearchQueryDto;
+import com.company.hrms.recruitment.model.CandidateStatus;
+import com.company.hrms.recruitment.model.CandidateViewDto;
+import com.company.hrms.recruitment.service.RecruitmentModuleApi;
+import com.company.hrms.recruitment.controller.RecruitmentController;
 import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
@@ -196,8 +196,8 @@ class MonolithSecurityAuthorizationTest {
         EmployeeModuleApi employeeModuleApi() {
             return new EmployeeModuleApi() {
                 @Override
-                public Mono<EmployeeView> createEmployee(com.company.hrms.employee.api.CreateEmployeeCommand command) {
-                    return Mono.just(new EmployeeView(
+                public Mono<EmployeeViewDto> createEmployee(com.company.hrms.employee.model.CreateEmployeeCommandDto command) {
+                    return Mono.just(new EmployeeViewDto(
                             UUID.randomUUID(),
                             "default",
                             command.employeeCode(),
@@ -211,13 +211,13 @@ class MonolithSecurityAuthorizationTest {
                 }
 
                 @Override
-                public Mono<EmployeeView> getEmployee(UUID employeeId) {
-                    return Mono.just(new EmployeeView(
+                public Mono<EmployeeViewDto> getEmployee(UUID employeeId) {
+                    return Mono.just(new EmployeeViewDto(
                             employeeId,
                             "default",
                             "EMP-TEST",
                             "Test",
-                            "User",
+                            "UserDto",
                             "test@hrms.local",
                             "ENG",
                             "Engineer",
@@ -226,13 +226,13 @@ class MonolithSecurityAuthorizationTest {
                 }
 
                 @Override
-                public Flux<EmployeeView> searchEmployees(EmployeeSearchQuery query) {
-                    return Flux.just(new EmployeeView(
+                public Flux<EmployeeViewDto> searchEmployees(EmployeeSearchQueryDto query) {
+                    return Flux.just(new EmployeeViewDto(
                             UUID.randomUUID(),
                             "default",
                             "EMP-TEST",
                             "Test",
-                            "User",
+                            "UserDto",
                             "test@hrms.local",
                             "ENG",
                             "Engineer",
@@ -251,9 +251,9 @@ class MonolithSecurityAuthorizationTest {
         PersonModuleApi personModuleApi() {
             return new PersonModuleApi() {
                 @Override
-                public Mono<PersonView> createPerson(com.company.hrms.person.api.CreatePersonCommand command) {
+                public Mono<PersonViewDto> createPerson(com.company.hrms.person.model.CreatePersonCommandDto command) {
                     Instant now = Instant.now();
-                    return Mono.just(new PersonView(
+                    return Mono.just(new PersonViewDto(
                             UUID.randomUUID(),
                             "default",
                             command.personCode(),
@@ -268,14 +268,14 @@ class MonolithSecurityAuthorizationTest {
                 }
 
                 @Override
-                public Mono<PersonView> getPerson(UUID personId) {
+                public Mono<PersonViewDto> getPerson(UUID personId) {
                     Instant now = Instant.now();
-                    return Mono.just(new PersonView(
+                    return Mono.just(new PersonViewDto(
                             personId,
                             "default",
                             "PER-TEST",
                             "Test",
-                            "Person",
+                            "PersonDto",
                             "person@hrms.local",
                             "+96800000000",
                             "OM",
@@ -285,14 +285,14 @@ class MonolithSecurityAuthorizationTest {
                 }
 
                 @Override
-                public Flux<PersonView> searchPersons(PersonSearchQuery query) {
+                public Flux<PersonViewDto> searchPersons(PersonSearchQueryDto query) {
                     Instant now = Instant.now();
-                    return Flux.just(new PersonView(
+                    return Flux.just(new PersonViewDto(
                             UUID.randomUUID(),
                             "default",
                             "PER-TEST",
                             "Test",
-                            "Person",
+                            "PersonDto",
                             "person@hrms.local",
                             "+96800000000",
                             "OM",
@@ -312,9 +312,9 @@ class MonolithSecurityAuthorizationTest {
         RecruitmentModuleApi recruitmentModuleApi() {
             return new RecruitmentModuleApi() {
                 @Override
-                public Mono<CandidateView> createCandidate(com.company.hrms.recruitment.api.CreateCandidateCommand command) {
+                public Mono<CandidateViewDto> createCandidate(com.company.hrms.recruitment.model.CreateCandidateCommandDto command) {
                     Instant now = Instant.now();
-                    return Mono.just(new CandidateView(
+                    return Mono.just(new CandidateViewDto(
                             UUID.randomUUID(),
                             "default",
                             command.personId(),
@@ -329,15 +329,15 @@ class MonolithSecurityAuthorizationTest {
                 }
 
                 @Override
-                public Mono<CandidateView> getCandidate(UUID candidateId) {
+                public Mono<CandidateViewDto> getCandidate(UUID candidateId) {
                     Instant now = Instant.now();
-                    return Mono.just(new CandidateView(
+                    return Mono.just(new CandidateViewDto(
                             candidateId,
                             "default",
                             UUID.randomUUID(),
                             "CAN-TEST",
                             "Test",
-                            "Candidate",
+                            "CandidateDto",
                             "candidate@hrms.local",
                             "ENG-001",
                             CandidateStatus.OFFER,
@@ -346,15 +346,15 @@ class MonolithSecurityAuthorizationTest {
                 }
 
                 @Override
-                public Flux<CandidateView> searchCandidates(CandidateSearchQuery query) {
+                public Flux<CandidateViewDto> searchCandidates(CandidateSearchQueryDto query) {
                     Instant now = Instant.now();
-                    return Flux.just(new CandidateView(
+                    return Flux.just(new CandidateViewDto(
                             UUID.randomUUID(),
                             "default",
                             UUID.randomUUID(),
                             "CAN-TEST",
                             "Test",
-                            "Candidate",
+                            "CandidateDto",
                             "candidate@hrms.local",
                             "ENG-001",
                             CandidateStatus.OFFER,
@@ -363,15 +363,15 @@ class MonolithSecurityAuthorizationTest {
                 }
 
                 @Override
-                public Mono<CandidateView> updateCandidateStatus(com.company.hrms.recruitment.api.UpdateCandidateStatusCommand command) {
+                public Mono<CandidateViewDto> updateCandidateStatus(com.company.hrms.recruitment.model.UpdateCandidateStatusCommandDto command) {
                     Instant now = Instant.now();
-                    return Mono.just(new CandidateView(
+                    return Mono.just(new CandidateViewDto(
                             command.candidateId(),
                             "default",
                             UUID.randomUUID(),
                             "CAN-TEST",
                             "Test",
-                            "Candidate",
+                            "CandidateDto",
                             "candidate@hrms.local",
                             "ENG-001",
                             command.status(),
@@ -380,15 +380,15 @@ class MonolithSecurityAuthorizationTest {
                 }
 
                 @Override
-                public Mono<CandidateView> hireCandidate(com.company.hrms.recruitment.api.HireCandidateCommand command) {
+                public Mono<CandidateViewDto> hireCandidate(com.company.hrms.recruitment.model.HireCandidateCommandDto command) {
                     Instant now = Instant.now();
-                    return Mono.just(new CandidateView(
+                    return Mono.just(new CandidateViewDto(
                             command.candidateId(),
                             "default",
                             UUID.randomUUID(),
                             "CAN-TEST",
                             "Test",
-                            "Candidate",
+                            "CandidateDto",
                             "candidate@hrms.local",
                             "ENG-001",
                             CandidateStatus.HIRED,

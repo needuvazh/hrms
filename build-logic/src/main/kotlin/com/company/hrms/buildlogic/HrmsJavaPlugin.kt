@@ -18,5 +18,10 @@ class HrmsJavaPlugin : Plugin<Project> {
         project.tasks.withType(Test::class.java).configureEach {
             useJUnitPlatform()
         }
+
+        project.dependencies.add("compileOnly", "org.projectlombok:lombok:1.18.34")
+        project.dependencies.add("annotationProcessor", "org.projectlombok:lombok:1.18.34")
+        project.dependencies.add("testCompileOnly", "org.projectlombok:lombok:1.18.34")
+        project.dependencies.add("testAnnotationProcessor", "org.projectlombok:lombok:1.18.34")
     }
 }

@@ -21,17 +21,18 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 class ModuleApiDependencyArchitectureTest {
 
     @ArchTest
-    static final ArchRule crossModuleAccessMustGoThroughApiPackages = classes()
+    static final ArchRule crossModuleAccessMustGoThroughServicePackages = classes()
             .that().resideInAnyPackage(
-                    "com.company.hrms..api..",
-                    "com.company.hrms..application..",
-                    "com.company.hrms..infrastructure..")
+                    "com.company.hrms..controller..",
+                    "com.company.hrms..service..",
+                    "com.company.hrms..repository..",
+                    "com.company.hrms..model..")
             .and().resideOutsideOfPackages("com.company.hrms.app..", "com.company.hrms.platform..")
-            .should(new CrossModuleApiOnlyCondition());
+            .should(new CrossModuleServiceOnlyCondition());
 
-    private static final class CrossModuleApiOnlyCondition extends ArchCondition<JavaClass> {
-        private CrossModuleApiOnlyCondition() {
-            super("depend on other modules through api packages only");
+    private static final class CrossModuleServiceOnlyCondition extends ArchCondition<JavaClass> {
+        private CrossModuleServiceOnlyCondition() {
+            super("depend on other modules through service/model packages only");
         }
 
         @Override
@@ -48,7 +49,10 @@ class ModuleApiDependencyArchitectureTest {
                 if (originModule.equals(targetModule)) {
                     continue;
                 }
-                if (targetPackage.contains(".api.") || targetPackage.endsWith(".api")) {
+                if (targetPackage.contains(".service.") || targetPackage.endsWith(".service")) {
+                    continue;
+                }
+                if (targetPackage.contains(".model.") || targetPackage.endsWith(".model")) {
                     continue;
                 }
                 if (targetPackage.startsWith("com.company.hrms.platform.")) {
@@ -57,7 +61,7 @@ class ModuleApiDependencyArchitectureTest {
 
                 events.add(SimpleConditionEvent.violated(
                         dependency,
-                        origin.getName() + " depends on non-api type " + target.getName()));
+                        origin.getName() + " depends on non-service/model type " + target.getName()));
             }
         }
 

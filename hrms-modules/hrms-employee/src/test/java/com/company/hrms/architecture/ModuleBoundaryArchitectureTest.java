@@ -17,9 +17,9 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 class ModuleBoundaryArchitectureTest {
 
     @ArchTest
-    static final ArchRule applicationApiDomainShouldNotDependOnInfrastructure = noClasses()
-            .that().resideInAnyPackage("..api..", "..application..", "..domain..")
-            .should().dependOnClassesThat().resideInAnyPackage("..infrastructure..");
+    static final ArchRule serviceModelRepositoryShouldNotDependOnController = noClasses()
+            .that().resideInAnyPackage("..service..", "..model..", "..repository..")
+            .should().dependOnClassesThat().resideInAnyPackage("..controller..");
 
     @ArchTest
     static final ArchRule modulesShouldNotDependOnAppPackages = noClasses()

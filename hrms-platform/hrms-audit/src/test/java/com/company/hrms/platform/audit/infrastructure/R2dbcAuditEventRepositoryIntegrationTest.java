@@ -2,6 +2,7 @@ package com.company.hrms.platform.audit.infrastructure;
 
 import com.company.hrms.platform.audit.api.AuditEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.r2dbc.spi.ConnectionFactoryOptions;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
 import java.util.List;
@@ -15,6 +16,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
+import static io.r2dbc.spi.ConnectionFactoryOptions.DRIVER;
+import static io.r2dbc.spi.ConnectionFactoryOptions.HOST;
+import static io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD;
+import static io.r2dbc.spi.ConnectionFactoryOptions.PORT;
+import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
 
 @Testcontainers(disabledWithoutDocker = true)
 class R2dbcAuditEventRepositoryIntegrationTest {
@@ -30,12 +37,14 @@ class R2dbcAuditEventRepositoryIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        String r2dbcUrl = "r2dbc:postgresql://%s:%d/%s".formatted(
-                postgres.getHost(),
-                postgres.getFirstMappedPort(),
-                postgres.getDatabaseName());
-        ConnectionFactory connectionFactory = ConnectionFactories.get(
-                r2dbcUrl + "?user=" + postgres.getUsername() + "&password=" + postgres.getPassword());
+        ConnectionFactory connectionFactory = ConnectionFactories.get(ConnectionFactoryOptions.builder()
+                .option(DRIVER, "postgresql")
+                .option(HOST, postgres.getHost())
+                .option(PORT, postgres.getFirstMappedPort())
+                .option(DATABASE, postgres.getDatabaseName())
+                .option(USER, postgres.getUsername())
+                .option(PASSWORD, postgres.getPassword())
+                .build());
         databaseClient = DatabaseClient.create(connectionFactory);
         repository = new R2dbcAuditEventRepository(databaseClient, new ObjectMapper());
 
@@ -183,7 +192,7 @@ class R2dbcAuditEventRepositoryIntegrationTest {
                 "system",
                 "system",
                 null,
-                "Candidate hired",
+                "CandidateDto hired",
                 "hrms-employee",
                 "evt-3",
                 "req-3",

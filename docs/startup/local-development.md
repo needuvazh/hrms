@@ -15,9 +15,12 @@ docker compose up -d
 ./gradlew :hrms-apps:hrms-app-monolith:bootRun
 ```
 
+On local runs, each app auto-starts a PostgreSQL Testcontainer by default.
+Set `HRMS_TC_POSTGRES_ENABLED=false` if you want to use an external database instead.
+
 Default local DB connection values:
-- JDBC: `jdbc:postgresql://localhost:5432/hrms`
-- R2DBC: `r2dbc:postgresql://localhost:5432/hrms`
+- JDBC: `jdbc:postgresql://localhost:5433/hrms`
+- R2DBC: `r2dbc:postgresql://localhost:5433/hrms`
 - Username/Password: `hrms` / `hrms`
 
 You can override values with env vars from `.env.example`.
