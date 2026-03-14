@@ -55,7 +55,17 @@ public class SecurityStarterAutoConfiguration {
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .addFilterAfter(tenantAuthenticationAlignmentWebFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .authorizeExchange(spec -> {
-                    spec.pathMatchers("/actuator/health", "/actuator/info", "/api/v1/ping", "/api/v1/auth/token").permitAll();
+                    spec.pathMatchers(
+                                    "/actuator/health",
+                                    "/actuator/info",
+                                    "/api/v1/ping",
+                                    "/api/v1/auth/token",
+                                    "/swagger-ui.html",
+                                    "/swagger-ui/**",
+                                    "/webjars/swagger-ui/**",
+                                    "/v3/api-docs",
+                                    "/v3/api-docs/**")
+                            .permitAll();
                     authorizationRulesCustomizers.orderedStream().forEach(customizer -> customizer.customize(spec));
                     spec.anyExchange().authenticated();
                 })
