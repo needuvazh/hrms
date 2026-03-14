@@ -59,7 +59,7 @@ public class SecurityStarterAutoConfiguration {
                                     "/actuator/health",
                                     "/actuator/info",
                                     "/api/v1/ping",
-                                    "/api/v1/auth/token",
+                                    "/api/v1/auth/login",
                                     "/swagger-ui.html",
                                     "/swagger-ui/**",
                                     "/webjars/swagger-ui/**",
@@ -132,6 +132,11 @@ public class SecurityStarterAutoConfiguration {
         List<String> permissions = jwt.getClaimAsStringList("permissions");
         if (permissions != null) {
             permissions.forEach(permission -> authorities.add(new SimpleGrantedAuthority("PERM_" + permission)));
+        }
+
+        List<String> scopes = jwt.getClaimAsStringList("scopes");
+        if (scopes != null) {
+            scopes.forEach(scope -> authorities.add(new SimpleGrantedAuthority("SCOPE_" + scope)));
         }
 
         return authorities;

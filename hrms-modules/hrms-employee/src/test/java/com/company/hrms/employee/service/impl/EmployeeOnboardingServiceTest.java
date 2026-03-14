@@ -206,7 +206,18 @@ class EmployeeOnboardingServiceTest {
 
         @Override
         public Mono<CurrentUserViewDto> currentUser() {
-            return Mono.just(new CurrentUserViewDto(UUID.randomUUID(), "admin", "default", Set.of(), Set.of()));
+            return Mono.just(new CurrentUserViewDto(
+                    UUID.randomUUID(),
+                    "admin",
+                    "System",
+                    "Administrator",
+                    "admin@local",
+                    true,
+                    true,
+                    "platform",
+                    Set.of("SUPER_ADMIN"),
+                    Set.of("EMPLOYEE_READ"),
+                    Set.of("TENANT_ALL")));
         }
 
         @Override

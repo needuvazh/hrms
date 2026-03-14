@@ -1,6 +1,5 @@
 package com.company.hrms.auth.model;
 
-import java.time.Instant;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -12,11 +11,7 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @EqualsAndHashCode
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class AuthTokenViewDto {
-    private final String accessToken;
-    private final String tokenType;
-    private final long expiresIn;
-    private final Instant issuedAt;
-    private final Instant expiresAt;
-    private final AuthenticatedUserViewDto user;
+public class ScopeDto {
+    private final String code;
+    private final String value;
 }

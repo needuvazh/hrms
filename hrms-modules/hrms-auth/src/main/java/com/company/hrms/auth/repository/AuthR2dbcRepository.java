@@ -1,10 +1,8 @@
 package com.company.hrms.auth.repository;
 
-import com.company.hrms.auth.model.*;
-
-import com.company.hrms.auth.repository.AuthRepository;
 import com.company.hrms.auth.model.PermissionDto;
 import com.company.hrms.auth.model.RoleDto;
+import com.company.hrms.auth.model.ScopeDto;
 import com.company.hrms.auth.model.UserDto;
 import com.company.hrms.auth.model.UserRoleAssignmentDto;
 import java.util.UUID;
@@ -23,23 +21,39 @@ public class AuthR2dbcRepository implements AuthRepository {
     }
 
     @Override
-    public Mono<UserDto> findActiveUserByUsername(String username, String tenantId) {
+    public Mono<UserDto> findActiveUserByUsername(String username) {
         return databaseClient.sql("""
-                        SELECT id, tenant_id, username, email, password_hash, is_active
+                        SELECT id,
+                               tenant_id,
+                               username,
+                               email,
+                               first_name,
+                               last_name,
+                               status,
+                               password_hash,
+                               is_active,
+                               is_super_admin,
+                               can_view_all_tenants
                         FROM auth.users
                         WHERE username = :username
-                          AND tenant_id = :tenantId
                           AND is_active = TRUE
+                          AND status = 'ACTIVE'
+                        ORDER BY is_super_admin DESC, updated_at DESC
+                        LIMIT 1
                         """)
                 .bind("username", username)
-                .bind("tenantId", tenantId)
                 .map((row, metadata) -> new UserDto(
                         row.get("id", UUID.class),
                         row.get("tenant_id", String.class),
                         row.get("username", String.class),
                         row.get("email", String.class),
+                        row.get("first_name", String.class),
+                        row.get("last_name", String.class),
+                        row.get("status", String.class),
                         row.get("password_hash", String.class),
-                        Boolean.TRUE.equals(row.get("is_active", Boolean.class))))
+                        Boolean.TRUE.equals(row.get("is_active", Boolean.class)),
+                        Boolean.TRUE.equals(row.get("is_super_admin", Boolean.class)),
+                        Boolean.TRUE.equals(row.get("can_view_all_tenants", Boolean.class))))
                 .one();
     }
 
@@ -83,6 +97,21 @@ public class AuthR2dbcRepository implements AuthRepository {
     }
 
     @Override
+    public Flux<ScopeDto> scopesForUser(UUID userId) {
+        return databaseClient.sql("""
+                        SELECT s.scope_code, us.scope_value
+                        FROM auth.user_scopes us
+                        JOIN auth.scopes s ON s.id = us.scope_id
+                        WHERE us.user_id = :userId
+                        """)
+                .bind("userId", userId)
+                .map((row, metadata) -> new ScopeDto(
+                        row.get("scope_code", String.class),
+                        row.get("scope_value", String.class)))
+                .all();
+    }
+
+    @Override
     public Flux<UserRoleAssignmentDto> roleAssignmentsForUser(UUID userId, String tenantId) {
         return databaseClient.sql("""
                         SELECT user_id, role_id, tenant_id
@@ -103,25 +132,73 @@ public class AuthR2dbcRepository implements AuthRepository {
     public Mono<UserDto> saveUser(UserDto user) {
         return databaseClient.sql("""
                         INSERT INTO auth.users(
-                            id, tenant_id, username, email, password_hash, is_active, created_at, updated_at
+                            id,
+                            tenant_id,
+                            username,
+                            email,
+                            first_name,
+                            last_name,
+                            status,
+                            password_hash,
+                            is_active,
+                            is_super_admin,
+                            can_view_all_tenants,
+                            created_at,
+                            updated_at,
+                            created_by,
+                            updated_by
                         ) VALUES (
-                            :id, :tenantId, :username, :email, :passwordHash, :isActive, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+                            :id,
+                            :tenantId,
+                            :username,
+                            :email,
+                            :firstName,
+                            :lastName,
+                            :status,
+                            :passwordHash,
+                            :isActive,
+                            :isSuperAdmin,
+                            :canViewAllTenants,
+                            CURRENT_TIMESTAMP,
+                            CURRENT_TIMESTAMP,
+                            'SYSTEM',
+                            'SYSTEM'
                         )
-                        RETURNING id, tenant_id, username, email, password_hash, is_active
+                        RETURNING id,
+                                  tenant_id,
+                                  username,
+                                  email,
+                                  first_name,
+                                  last_name,
+                                  status,
+                                  password_hash,
+                                  is_active,
+                                  is_super_admin,
+                                  can_view_all_tenants
                         """)
                 .bind("id", user.id())
                 .bind("tenantId", user.tenantId())
                 .bind("username", user.username())
                 .bind("email", user.email())
+                .bind("firstName", user.firstName())
+                .bind("lastName", user.lastName())
+                .bind("status", user.status())
                 .bind("passwordHash", user.passwordHash())
                 .bind("isActive", user.active())
+                .bind("isSuperAdmin", user.superAdmin())
+                .bind("canViewAllTenants", user.canViewAllTenants())
                 .map((row, metadata) -> new UserDto(
                         row.get("id", UUID.class),
                         row.get("tenant_id", String.class),
                         row.get("username", String.class),
                         row.get("email", String.class),
+                        row.get("first_name", String.class),
+                        row.get("last_name", String.class),
+                        row.get("status", String.class),
                         row.get("password_hash", String.class),
-                        Boolean.TRUE.equals(row.get("is_active", Boolean.class))))
+                        Boolean.TRUE.equals(row.get("is_active", Boolean.class)),
+                        Boolean.TRUE.equals(row.get("is_super_admin", Boolean.class)),
+                        Boolean.TRUE.equals(row.get("can_view_all_tenants", Boolean.class))))
                 .one();
     }
 
@@ -153,6 +230,19 @@ public class AuthR2dbcRepository implements AuthRepository {
                 .bind("userId", userId)
                 .bind("roleId", roleId)
                 .bind("tenantId", tenantId)
+                .then();
+    }
+
+    @Override
+    public Mono<Void> updateLastLoginAt(UUID userId) {
+        return databaseClient.sql("""
+                        UPDATE auth.users
+                        SET last_login_at = CURRENT_TIMESTAMP,
+                            updated_at = CURRENT_TIMESTAMP,
+                            updated_by = 'SYSTEM'
+                        WHERE id = :userId
+                        """)
+                .bind("userId", userId)
                 .then();
     }
 }

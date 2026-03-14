@@ -1,7 +1,8 @@
 package com.company.hrms.auth.model;
 
-import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import java.util.Set;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -12,16 +13,15 @@ import lombok.experimental.Accessors;
 @Accessors(fluent = true)
 @EqualsAndHashCode
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class UserDto {
+public class AuthenticatedUserViewDto {
     private final UUID id;
-    private final String tenantId;
     private final String username;
-    private final String email;
     private final String firstName;
     private final String lastName;
-    private final String status;
-    private final String passwordHash;
-    private final boolean active;
+    private final String email;
     private final boolean superAdmin;
     private final boolean canViewAllTenants;
+    private final Set<String> roles;
+    private final Set<String> permissions;
+    private final Set<String> scopes;
 }

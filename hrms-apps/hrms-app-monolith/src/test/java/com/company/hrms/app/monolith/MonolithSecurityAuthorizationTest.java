@@ -178,9 +178,15 @@ class MonolithSecurityAuthorizationTest {
         StepVerifier.create(jwtTokenService.issueToken(new JwtTokenClaims(
                                 UUID.fromString("21111111-1111-1111-1111-111111111111"),
                                 "admin",
+                                "admin@local",
+                                "System",
+                                "Administrator",
                                 "default",
+                                false,
+                                false,
                                 roles,
-                                permissions))
+                                permissions,
+                                Set.of()))
                         .map(token -> token.tokenValue()))
                 .assertNext(token -> value[0] = token)
                 .verifyComplete();

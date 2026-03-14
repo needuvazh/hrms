@@ -1,22 +1,22 @@
 package com.company.hrms.auth.service.impl;
 
-import com.company.hrms.auth.model.*;
-import com.company.hrms.auth.repository.*;
-import com.company.hrms.auth.service.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.company.hrms.auth.model.AuthTokenCommandDto;
-import com.company.hrms.contracts.auth.ProvisionUserAccountCommandDto;
-import com.company.hrms.auth.repository.AuthRepository;
 import com.company.hrms.auth.model.PermissionDto;
 import com.company.hrms.auth.model.RoleDto;
+import com.company.hrms.auth.model.ScopeDto;
 import com.company.hrms.auth.model.UserDto;
 import com.company.hrms.auth.model.UserRoleAssignmentDto;
+import com.company.hrms.auth.repository.AuthRepository;
+import com.company.hrms.contracts.auth.ProvisionUserAccountCommandDto;
 import com.company.hrms.platform.audit.api.AuditEvent;
 import com.company.hrms.platform.audit.api.AuditEventPublisher;
 import com.company.hrms.platform.starter.error.exception.HrmsException;
 import com.company.hrms.platform.starter.security.api.CurrentUserContext;
 import com.company.hrms.platform.starter.security.api.CurrentUserContextAccessor;
-import com.company.hrms.platform.starter.security.api.JwtTokenClaims;
 import com.company.hrms.platform.starter.security.api.JwtTokenService;
 import com.company.hrms.platform.starter.security.api.JwtTokenValue;
 import com.company.hrms.platform.starter.tenancy.context.DefaultTenantContextAccessor;
@@ -33,10 +33,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 class AuthApplicationServiceTest {
 
     private final PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
@@ -45,9 +41,15 @@ class AuthApplicationServiceTest {
             () -> Mono.just(new CurrentUserContext(
                     UUID.fromString("21111111-1111-1111-1111-111111111111"),
                     "admin",
-                    "default",
-                    Set.of("HR_ADMIN"),
-                    Set.of("EMPLOYEE_READ", "EMPLOYEE_WRITE")));
+                    "admin@local",
+                    "System",
+                    "Administrator",
+                    "platform",
+                    true,
+                    true,
+                    Set.of("SUPER_ADMIN"),
+                    Set.of("EMPLOYEE_READ", "EMPLOYEE_WRITE"),
+                    Set.of("TENANT_ALL", "SYSTEM_ALL")));
 
     private final JwtTokenService jwtTokenService = claims -> Mono.just(new JwtTokenValue(
             "jwt-token-for-" + claims.username(),
@@ -65,14 +67,14 @@ class AuthApplicationServiceTest {
 
     @Test
     void issuesTokenWhenCredentialsValid() {
-        StepVerifier.create(authApplicationService.issueToken(new AuthTokenCommandDto("admin", "admin123"))
-                        .contextWrite(ReactorTenantContext.withTenantId("default")))
+        StepVerifier.create(authApplicationService.issueToken(new AuthTokenCommandDto("admin", "admin")))
                 .assertNext(token -> {
                     assertEquals("Bearer", token.tokenType());
-                    assertEquals("default", token.tenantId());
-                    assertEquals("admin", token.username());
-                    assertEquals(Set.of("HR_ADMIN"), token.roles());
-                    assertEquals(Set.of("EMPLOYEE_READ", "EMPLOYEE_WRITE"), token.permissions());
+                    assertEquals(3600L, token.expiresIn());
+                    assertEquals("admin", token.user().username());
+                    assertEquals(Set.of("SUPER_ADMIN"), token.user().roles());
+                    assertEquals(Set.of("EMPLOYEE_READ", "EMPLOYEE_WRITE"), token.user().permissions());
+                    assertEquals(Set.of("TENANT_ALL", "SYSTEM_ALL"), token.user().scopes());
                 })
                 .verifyComplete();
 
@@ -81,8 +83,7 @@ class AuthApplicationServiceTest {
 
     @Test
     void rejectsInvalidCredentials() {
-        StepVerifier.create(authApplicationService.issueToken(new AuthTokenCommandDto("admin", "wrong"))
-                        .contextWrite(ReactorTenantContext.withTenantId("default")))
+        StepVerifier.create(authApplicationService.issueToken(new AuthTokenCommandDto("admin", "wrong")))
                 .expectErrorSatisfies(error -> {
                     assertInstanceOf(HrmsException.class, error);
                     HrmsException exception = (HrmsException) error;
@@ -93,22 +94,14 @@ class AuthApplicationServiceTest {
         assertTrue(auditEventPublisher.actions.contains("AUTHENTICATION_FAILED"));
     }
 
-    static class RecordingAuditEventPublisher implements AuditEventPublisher {
-        private final CopyOnWriteArrayList<String> actions = new CopyOnWriteArrayList<>();
-
-        @Override
-        public Mono<Void> publish(AuditEvent event) {
-            actions.add(event.action());
-            return Mono.empty();
-        }
-    }
-
     @Test
     void returnsCurrentAuthenticatedUser() {
         StepVerifier.create(authApplicationService.currentUser())
                 .assertNext(user -> {
                     assertEquals("admin", user.username());
-                    assertEquals("default", user.tenantId());
+                    assertEquals("platform", user.tenantId());
+                    assertTrue(user.superAdmin());
+                    assertEquals(Set.of("TENANT_ALL", "SYSTEM_ALL"), user.scopes());
                 })
                 .verifyComplete();
     }
@@ -125,30 +118,49 @@ class AuthApplicationServiceTest {
                 .verifyComplete();
     }
 
+    static class RecordingAuditEventPublisher implements AuditEventPublisher {
+        private final CopyOnWriteArrayList<String> actions = new CopyOnWriteArrayList<>();
+
+        @Override
+        public Mono<Void> publish(AuditEvent event) {
+            actions.add(event.action());
+            return Mono.empty();
+        }
+    }
+
     static class InMemoryAuthRepository implements AuthRepository {
 
         private final UserDto user;
         private final List<RoleDto> roles;
         private final List<PermissionDto> permissions;
+        private final List<ScopeDto> scopes;
 
         InMemoryAuthRepository(PasswordEncoder passwordEncoder) {
             UUID userId = UUID.fromString("21111111-1111-1111-1111-111111111111");
             this.user = new UserDto(
                     userId,
-                    "default",
+                    "platform",
                     "admin",
-                    "admin@default.hrms",
-                    passwordEncoder.encode("admin123"),
+                    "admin@local",
+                    "System",
+                    "Administrator",
+                    "ACTIVE",
+                    passwordEncoder.encode("admin"),
+                    true,
+                    true,
                     true);
-            this.roles = List.of(new RoleDto(UUID.randomUUID(), "default", "HR_ADMIN", "HR Admin"));
+            this.roles = List.of(new RoleDto(UUID.randomUUID(), "platform", "SUPER_ADMIN", "Super Admin"));
             this.permissions = List.of(
-                    new PermissionDto(UUID.randomUUID(), "default", "EMPLOYEE_READ", "Read EmployeeDto"),
-                    new PermissionDto(UUID.randomUUID(), "default", "EMPLOYEE_WRITE", "Write EmployeeDto"));
+                    new PermissionDto(UUID.randomUUID(), "platform", "EMPLOYEE_READ", "Read Employee"),
+                    new PermissionDto(UUID.randomUUID(), "platform", "EMPLOYEE_WRITE", "Write Employee"));
+            this.scopes = List.of(
+                    new ScopeDto("TENANT_ALL", null),
+                    new ScopeDto("SYSTEM_ALL", null));
         }
 
         @Override
-        public Mono<UserDto> findActiveUserByUsername(String username, String tenantId) {
-            if ("admin".equals(username) && "default".equals(tenantId)) {
+        public Mono<UserDto> findActiveUserByUsername(String username) {
+            if ("admin".equals(username)) {
                 return Mono.just(user);
             }
             return Mono.empty();
@@ -162,6 +174,11 @@ class AuthApplicationServiceTest {
         @Override
         public Flux<PermissionDto> permissionsForUser(UUID userId, String tenantId) {
             return Flux.fromIterable(permissions);
+        }
+
+        @Override
+        public Flux<ScopeDto> scopesForUser(UUID userId) {
+            return Flux.fromIterable(scopes);
         }
 
         @Override
@@ -183,6 +200,11 @@ class AuthApplicationServiceTest {
 
         @Override
         public Mono<Void> assignRoleToUser(UUID userId, UUID roleId, String tenantId) {
+            return Mono.empty();
+        }
+
+        @Override
+        public Mono<Void> updateLastLoginAt(UUID userId) {
             return Mono.empty();
         }
     }

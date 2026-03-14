@@ -8,11 +8,13 @@ import reactor.core.publisher.Mono;
 
 public interface AuthRepository {
 
-    Mono<UserDto> findActiveUserByUsername(String username, String tenantId);
+    Mono<UserDto> findActiveUserByUsername(String username);
 
     Flux<RoleDto> rolesForUser(UUID userId, String tenantId);
 
     Flux<PermissionDto> permissionsForUser(UUID userId, String tenantId);
+
+    Flux<ScopeDto> scopesForUser(UUID userId);
 
     Flux<UserRoleAssignmentDto> roleAssignmentsForUser(UUID userId, String tenantId);
 
@@ -21,4 +23,6 @@ public interface AuthRepository {
     Mono<RoleDto> findRoleByCode(String roleCode, String tenantId);
 
     Mono<Void> assignRoleToUser(UUID userId, UUID roleId, String tenantId);
+
+    Mono<Void> updateLastLoginAt(UUID userId);
 }

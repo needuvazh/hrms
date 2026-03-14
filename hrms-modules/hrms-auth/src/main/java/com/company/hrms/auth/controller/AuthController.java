@@ -1,13 +1,10 @@
 package com.company.hrms.auth.controller;
 
-import com.company.hrms.auth.model.*;
-import com.company.hrms.auth.service.*;
-
-import com.company.hrms.auth.service.AuthModuleApi;
 import com.company.hrms.auth.model.AuthTokenCommandDto;
 import com.company.hrms.auth.model.AuthTokenViewDto;
 import com.company.hrms.auth.model.CurrentUserViewDto;
 import com.company.hrms.auth.model.RoleViewDto;
+import com.company.hrms.auth.service.AuthModuleApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,9 +31,9 @@ public class AuthController {
         this.authModuleApi = authModuleApi;
     }
 
-    @PostMapping("/token")
-    @Operation(summary = "Issue access token", description = "Authenticates the user credentials and returns a token for subsequent secured API calls.")
-    public Mono<AuthTokenViewDto> issueToken(@Valid @RequestBody AuthTokenRequest request) {
+    @PostMapping("/login")
+    @Operation(summary = "Authenticate and issue access token", description = "Authenticates username and password, then returns JWT with role, permission, and scope details.")
+    public Mono<AuthTokenViewDto> login(@Valid @RequestBody LoginRequest request) {
         return authModuleApi.issueToken(new AuthTokenCommandDto(request.username(), request.password()));
     }
 
@@ -47,15 +44,15 @@ public class AuthController {
     }
 
     @GetMapping("/me/roles")
-    @Operation(summary = "Get current user roles", description = "Returns the role assignments for the currently authenticated user within the active tenant.")
+    @Operation(summary = "Get current user roles", description = "Returns the role assignments for the currently authenticated user.")
     public Flux<RoleViewDto> currentUserRoles() {
         return authModuleApi.getRolesForCurrentUser();
     }
 
-    public record AuthTokenRequest(
+    public record LoginRequest(
             @Schema(description = "Unique user login name", example = "admin")
             @NotBlank String username,
-            @Schema(description = "Raw account password", example = "P@ssw0rd")
+            @Schema(description = "Raw account password", example = "admin")
             @NotBlank String password
     ) {
     }

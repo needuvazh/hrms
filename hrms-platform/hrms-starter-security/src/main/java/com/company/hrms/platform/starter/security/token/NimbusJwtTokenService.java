@@ -34,9 +34,15 @@ public class NimbusJwtTokenService implements JwtTokenService {
                     .issuedAt(issuedAt)
                     .expiresAt(expiresAt)
                     .claim("uid", claims.userId().toString())
+                    .claim("email", claims.email())
+                    .claim("first_name", claims.firstName())
+                    .claim("last_name", claims.lastName())
                     .claim("tenant", claims.tenantId())
+                    .claim("super_admin", claims.superAdmin())
+                    .claim("can_view_all_tenants", claims.canViewAllTenants())
                     .claim("roles", claims.roles())
                     .claim("permissions", claims.permissions())
+                    .claim("scopes", claims.scopes())
                     .build();
 
             JwsHeader header = JwsHeader.with(MacAlgorithm.HS256).build();

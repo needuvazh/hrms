@@ -1,20 +1,18 @@
 package com.company.hrms.auth.service.impl;
 
-import com.company.hrms.auth.model.*;
-import com.company.hrms.auth.repository.*;
-import com.company.hrms.auth.service.*;
-
-import com.company.hrms.auth.service.AuthModuleApi;
 import com.company.hrms.auth.model.AuthTokenCommandDto;
 import com.company.hrms.auth.model.AuthTokenViewDto;
+import com.company.hrms.auth.model.AuthenticatedUserViewDto;
 import com.company.hrms.auth.model.CurrentUserViewDto;
-import com.company.hrms.contracts.auth.ProvisionUserAccountCommandDto;
-import com.company.hrms.auth.model.ProvisionedUserAccountViewDto;
-import com.company.hrms.auth.model.RoleViewDto;
-import com.company.hrms.auth.repository.AuthRepository;
 import com.company.hrms.auth.model.PermissionDto;
+import com.company.hrms.auth.model.ProvisionedUserAccountViewDto;
 import com.company.hrms.auth.model.RoleDto;
+import com.company.hrms.auth.model.RoleViewDto;
+import com.company.hrms.auth.model.ScopeDto;
 import com.company.hrms.auth.model.UserDto;
+import com.company.hrms.auth.repository.AuthRepository;
+import com.company.hrms.auth.service.AuthModuleApi;
+import com.company.hrms.contracts.auth.ProvisionUserAccountCommandDto;
 import com.company.hrms.platform.audit.api.AuditEvent;
 import com.company.hrms.platform.audit.api.AuditEventPublisher;
 import com.company.hrms.platform.starter.error.exception.HrmsException;
@@ -22,6 +20,7 @@ import com.company.hrms.platform.starter.security.api.CurrentUserContextAccessor
 import com.company.hrms.platform.starter.security.api.JwtTokenClaims;
 import com.company.hrms.platform.starter.security.api.JwtTokenService;
 import com.company.hrms.platform.starter.tenancy.api.TenantContextAccessor;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -29,6 +28,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -60,28 +60,38 @@ public class AuthApplicationService implements AuthModuleApi {
 
     @Override
     public Mono<AuthTokenViewDto> issueToken(AuthTokenCommandDto command) {
-        return tenantContextAccessor.currentTenantId()
-                .switchIfEmpty(Mono.error(new HrmsException(HttpStatus.BAD_REQUEST, "TENANT_REQUIRED", "Tenant is required")))
-                .flatMap(tenantId -> authRepository.findActiveUserByUsername(command.username(), tenantId)
-                        .switchIfEmpty(onFailedAuthentication(tenantId, command.username(), "USER_NOT_FOUND")
-                                .then(Mono.error(new HrmsException(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", "Invalid credentials"))))
-                        .flatMap(user -> validateCredentials(user, command.password(), tenantId)
-                                .then(buildTokenView(user))
-                                .flatMap(token -> auditEventPublisher.publish(AuditEvent.of(
-                                                user.username(),
-                                                tenantId,
-                                                "AUTH_TOKEN_ISSUED",
-                                                "USER",
-                                                user.id().toString(),
-                                                Map.of("username", user.username())))
-                                        .thenReturn(token))));
+        return authRepository.findActiveUserByUsername(command.username())
+                .switchIfEmpty(onFailedAuthentication("platform", command.username(), "USER_NOT_FOUND")
+                        .then(Mono.error(new HrmsException(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", "Invalid credentials"))))
+                .flatMap(user -> validateCredentials(user, command.password())
+                        .then(authRepository.updateLastLoginAt(user.id()))
+                        .then(buildTokenView(user))
+                        .flatMap(token -> auditEventPublisher.publish(AuditEvent.of(
+                                        user.username(),
+                                        user.tenantId(),
+                                        "AUTH_TOKEN_ISSUED",
+                                        "USER",
+                                        user.id().toString(),
+                                        Map.of("username", user.username())))
+                                .thenReturn(token)));
     }
 
     @Override
     public Mono<CurrentUserViewDto> currentUser() {
         return currentUserContextAccessor.currentUser()
                 .switchIfEmpty(Mono.error(new HrmsException(HttpStatus.UNAUTHORIZED, "UNAUTHENTICATED", "Authentication is required")))
-                .map(user -> new CurrentUserViewDto(user.userId(), user.username(), user.tenantId(), user.roles(), user.permissions()));
+                .map(user -> new CurrentUserViewDto(
+                        user.userId(),
+                        user.username(),
+                        user.firstName(),
+                        user.lastName(),
+                        user.email(),
+                        user.superAdmin(),
+                        user.canViewAllTenants(),
+                        user.tenantId(),
+                        user.roles(),
+                        user.permissions(),
+                        user.scopes()));
     }
 
     @Override
@@ -94,9 +104,9 @@ public class AuthApplicationService implements AuthModuleApi {
 
     @Override
     public Mono<ProvisionedUserAccountViewDto> provisionUserAccount(ProvisionUserAccountCommandDto command) {
-        if (command == null || !org.springframework.util.StringUtils.hasText(command.username())
-                || !org.springframework.util.StringUtils.hasText(command.email())
-                || !org.springframework.util.StringUtils.hasText(command.rawPassword())) {
+        if (command == null || !StringUtils.hasText(command.username())
+                || !StringUtils.hasText(command.email())
+                || !StringUtils.hasText(command.rawPassword())) {
             return Mono.error(new HrmsException(HttpStatus.BAD_REQUEST, "INVALID_USER_PROVISION_REQUEST", "Username, email and password are required"));
         }
 
@@ -108,12 +118,17 @@ public class AuthApplicationService implements AuthModuleApi {
                             tenantId,
                             command.username().trim(),
                             command.email().trim(),
+                            command.username().trim(),
+                            "",
+                            "ACTIVE",
                             passwordEncoder.encode(command.rawPassword()),
-                            true);
+                            true,
+                            false,
+                            false);
 
                     Mono<UserDto> saveUserMono = authRepository.saveUser(newUser);
                     Mono<String> roleMono;
-                    if (org.springframework.util.StringUtils.hasText(command.roleCode())) {
+                    if (StringUtils.hasText(command.roleCode())) {
                         roleMono = authRepository.findRoleByCode(command.roleCode().trim(), tenantId)
                                 .switchIfEmpty(Mono.error(new HrmsException(HttpStatus.BAD_REQUEST, "ROLE_NOT_FOUND", "RoleDto not found")))
                                 .flatMap(role -> authRepository.assignRoleToUser(newUser.id(), role.id(), tenantId)
@@ -143,10 +158,10 @@ public class AuthApplicationService implements AuthModuleApi {
                 });
     }
 
-    private Mono<Void> validateCredentials(UserDto user, String rawPassword, String tenantId) {
+    private Mono<Void> validateCredentials(UserDto user, String rawPassword) {
         boolean matches = passwordEncoder.matches(rawPassword, user.passwordHash());
         if (!matches) {
-            return onFailedAuthentication(tenantId, user.username(), "PASSWORD_MISMATCH")
+            return onFailedAuthentication(user.tenantId(), user.username(), "PASSWORD_MISMATCH")
                     .then(Mono.error(new HrmsException(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", "Invalid credentials")));
         }
         return Mono.empty();
@@ -171,22 +186,46 @@ public class AuthApplicationService implements AuthModuleApi {
                 .map(PermissionDto::code)
                 .collect(Collectors.toSet());
 
-        return Mono.zip(rolesMono, permissionsMono)
+        Mono<Set<String>> scopesMono = authRepository.scopesForUser(user.id())
+                .map(this::scopeEntry)
+                .collect(Collectors.toSet());
+
+        return Mono.zip(rolesMono, permissionsMono, scopesMono)
                 .flatMap(tuple -> jwtTokenService.issueToken(new JwtTokenClaims(
                                 user.id(),
                                 user.username(),
+                                user.email(),
+                                user.firstName(),
+                                user.lastName(),
                                 user.tenantId(),
+                                user.superAdmin(),
+                                user.canViewAllTenants(),
                                 tuple.getT1(),
-                                tuple.getT2()))
+                                tuple.getT2(),
+                                tuple.getT3()))
                         .map(token -> new AuthTokenViewDto(
                                 token.tokenValue(),
                                 "Bearer",
+                                Duration.between(token.issuedAt(), token.expiresAt()).toSeconds(),
                                 token.issuedAt(),
                                 token.expiresAt(),
-                                user.id(),
-                                user.username(),
-                                user.tenantId(),
-                                tuple.getT1(),
-                                tuple.getT2())));
+                                new AuthenticatedUserViewDto(
+                                        user.id(),
+                                        user.username(),
+                                        user.firstName(),
+                                        user.lastName(),
+                                        user.email(),
+                                        user.superAdmin(),
+                                        user.canViewAllTenants(),
+                                        tuple.getT1(),
+                                        tuple.getT2(),
+                                        tuple.getT3()))));
+    }
+
+    private String scopeEntry(ScopeDto scopeDto) {
+        if (StringUtils.hasText(scopeDto.value())) {
+            return scopeDto.code() + ":" + scopeDto.value();
+        }
+        return scopeDto.code();
     }
 }
