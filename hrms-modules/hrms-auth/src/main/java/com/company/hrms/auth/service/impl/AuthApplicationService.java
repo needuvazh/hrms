@@ -8,7 +8,7 @@ import com.company.hrms.auth.service.AuthModuleApi;
 import com.company.hrms.auth.model.AuthTokenCommandDto;
 import com.company.hrms.auth.model.AuthTokenViewDto;
 import com.company.hrms.auth.model.CurrentUserViewDto;
-import com.company.hrms.auth.model.ProvisionUserAccountCommandDto;
+import com.company.hrms.contracts.auth.ProvisionUserAccountCommandDto;
 import com.company.hrms.auth.model.ProvisionedUserAccountViewDto;
 import com.company.hrms.auth.model.RoleViewDto;
 import com.company.hrms.auth.repository.AuthRepository;

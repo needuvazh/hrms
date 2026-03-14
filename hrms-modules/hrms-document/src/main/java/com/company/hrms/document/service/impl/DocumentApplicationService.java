@@ -4,13 +4,11 @@ import com.company.hrms.document.model.*;
 import com.company.hrms.document.repository.*;
 import com.company.hrms.document.service.*;
 
-import com.company.hrms.document.model.AttachDocumentCommandDto;
+import com.company.hrms.contracts.document.AttachDocumentCommandDto;
 import com.company.hrms.document.model.DocumentExpiryQueryDto;
 import com.company.hrms.document.model.DocumentListQueryDto;
 import com.company.hrms.document.service.DocumentModuleApi;
 import com.company.hrms.document.model.DocumentRecordViewDto;
-import com.company.hrms.document.model.ExpiryDateDto;
-import com.company.hrms.document.model.VerificationStatus;
 import com.company.hrms.document.model.DocumentRecordDto;
 import com.company.hrms.document.repository.DocumentRepository;
 import com.company.hrms.document.model.DocumentStorageAdapter;
@@ -57,8 +55,8 @@ public class DocumentApplicationService implements DocumentModuleApi {
                         command.checksum()))
                 .flatMap(storageReference -> {
                     Instant now = Instant.now();
-                    VerificationStatus status = command.initialVerificationStatus() == null
-                            ? VerificationStatus.PENDING
+                    com.company.hrms.contracts.document.VerificationStatus status = command.initialVerificationStatus() == null
+                            ? com.company.hrms.contracts.document.VerificationStatus.PENDING
                             : command.initialVerificationStatus();
 
                     DocumentRecordDto record = new DocumentRecordDto(
@@ -213,15 +211,15 @@ public class DocumentApplicationService implements DocumentModuleApi {
                 record.updatedBy());
     }
 
-    private com.company.hrms.document.model.DocumentType toDomainDocumentType(com.company.hrms.document.model.DocumentType type) {
+    private com.company.hrms.document.model.DocumentType toDomainDocumentType(com.company.hrms.contracts.document.DocumentType type) {
         return com.company.hrms.document.model.DocumentType.valueOf(type.name());
     }
 
-    private com.company.hrms.document.model.ExpiryDateDto toDomainExpiryDate(ExpiryDateDto expiryDate) {
+    private com.company.hrms.document.model.ExpiryDateDto toDomainExpiryDate(com.company.hrms.contracts.document.ExpiryDateDto expiryDate) {
         return new com.company.hrms.document.model.ExpiryDateDto(expiryDate.value());
     }
 
-    private com.company.hrms.document.model.VerificationStatus toDomainVerificationStatus(VerificationStatus status) {
+    private com.company.hrms.document.model.VerificationStatus toDomainVerificationStatus(com.company.hrms.contracts.document.VerificationStatus status) {
         return com.company.hrms.document.model.VerificationStatus.valueOf(status.name());
     }
 
@@ -229,11 +227,11 @@ public class DocumentApplicationService implements DocumentModuleApi {
         return com.company.hrms.document.model.DocumentType.valueOf(type.name());
     }
 
-    private ExpiryDateDto toApiExpiryDate(com.company.hrms.document.model.ExpiryDateDto expiryDate) {
-        return new ExpiryDateDto(expiryDate.value());
+    private com.company.hrms.document.model.ExpiryDateDto toApiExpiryDate(com.company.hrms.document.model.ExpiryDateDto expiryDate) {
+        return new com.company.hrms.document.model.ExpiryDateDto(expiryDate.value());
     }
 
-    private VerificationStatus toApiVerificationStatus(com.company.hrms.document.model.VerificationStatus status) {
-        return VerificationStatus.valueOf(status.name());
+    private com.company.hrms.document.model.VerificationStatus toApiVerificationStatus(com.company.hrms.document.model.VerificationStatus status) {
+        return com.company.hrms.document.model.VerificationStatus.valueOf(status.name());
     }
 }

@@ -1,6 +1,6 @@
 package com.company.hrms.wps.model;
 
-import com.company.hrms.payroll.model.PayslipViewDto;
+import com.company.hrms.contracts.payroll.PayslipViewDto;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;

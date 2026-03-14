@@ -4,11 +4,14 @@ import com.company.hrms.payroll.model.*;
 import com.company.hrms.payroll.repository.*;
 import com.company.hrms.payroll.service.*;
 
-import com.company.hrms.document.model.AttachDocumentCommandDto;
-import com.company.hrms.document.model.DocumentType;
+import com.company.hrms.contracts.document.AttachDocumentCommandDto;
+import com.company.hrms.contracts.document.DocumentType;
 import com.company.hrms.document.service.DocumentModuleApi;
-import com.company.hrms.document.model.ExpiryDateDto;
-import com.company.hrms.document.model.VerificationStatus;
+import com.company.hrms.contracts.document.ExpiryDateDto;
+import com.company.hrms.contracts.document.VerificationStatus;
+import com.company.hrms.contracts.payroll.PayrollEmployeeRecordViewDto;
+import com.company.hrms.contracts.payroll.PayrollRunViewDto;
+import com.company.hrms.contracts.payroll.PayslipViewDto;
 import com.company.hrms.notification.model.CreateNotificationCommandDto;
 import com.company.hrms.notification.model.NotificationChannel;
 import com.company.hrms.notification.service.NotificationModuleApi;
@@ -16,11 +19,8 @@ import com.company.hrms.payroll.model.AttachPayrollEmployeeRecordCommandDto;
 import com.company.hrms.payroll.model.DefinePayrollPeriodCommandDto;
 import com.company.hrms.payroll.model.PayrollAmountComponentDto;
 import com.company.hrms.payroll.model.PayrollApprovalDecision;
-import com.company.hrms.payroll.model.PayrollEmployeeRecordViewDto;
 import com.company.hrms.payroll.service.PayrollModuleApi;
 import com.company.hrms.payroll.model.PayrollPeriodViewDto;
-import com.company.hrms.payroll.model.PayrollRunViewDto;
-import com.company.hrms.payroll.model.PayslipViewDto;
 import com.company.hrms.payroll.model.ReviewPayrollRunCommandDto;
 import com.company.hrms.payroll.model.StartPayrollRunCommandDto;
 import com.company.hrms.payroll.model.SubmitPayrollRunCommandDto;
@@ -40,9 +40,9 @@ import com.company.hrms.platform.outbox.api.OutboxEvent;
 import com.company.hrms.platform.outbox.api.OutboxPublisher;
 import com.company.hrms.platform.starter.error.exception.HrmsException;
 import com.company.hrms.platform.starter.tenancy.api.TenantContextAccessor;
-import com.company.hrms.workflow.model.AdvanceWorkflowCommandDto;
-import com.company.hrms.workflow.model.StartWorkflowCommandDto;
-import com.company.hrms.workflow.model.WorkflowAction;
+import com.company.hrms.contracts.workflow.AdvanceWorkflowCommandDto;
+import com.company.hrms.contracts.workflow.StartWorkflowCommandDto;
+import com.company.hrms.contracts.workflow.WorkflowAction;
 import com.company.hrms.workflow.service.WorkflowModuleApi;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.math.BigDecimal;
@@ -486,10 +486,10 @@ public class PayrollApplicationService implements PayrollModuleApi {
                 .switchIfEmpty(Mono.error(new HrmsException(HttpStatus.NOT_FOUND, "PAYROLL_RECORD_NOT_FOUND", "Payroll employee record not found")))
                 .flatMap(record -> Mono.zip(
                                 payrollRepository.findEarningComponentsByPayrollEmployeeRecordId(tenantId, record.id())
-                                        .map(component -> new PayrollAmountComponentDto(component.code(), component.name(), component.amount()))
+                                        .map(component -> new com.company.hrms.contracts.payroll.PayrollAmountComponentDto(component.code(), component.name(), component.amount()))
                                         .collectList(),
                                 payrollRepository.findDeductionComponentsByPayrollEmployeeRecordId(tenantId, record.id())
-                                        .map(component -> new PayrollAmountComponentDto(component.code(), component.name(), component.amount()))
+                                        .map(component -> new com.company.hrms.contracts.payroll.PayrollAmountComponentDto(component.code(), component.name(), component.amount()))
                                         .collectList())
                         .map(tuple -> new PayslipViewDto(
                                 payslip.id(),
@@ -661,8 +661,8 @@ public class PayrollApplicationService implements PayrollModuleApi {
                 .increment();
     }
 
-    private com.company.hrms.payroll.model.PayrollRunStatus toApiPayrollRunStatus(PayrollRunStatus status) {
-        return com.company.hrms.payroll.model.PayrollRunStatus.valueOf(status.name());
+    private com.company.hrms.contracts.payroll.PayrollRunStatus toApiPayrollRunStatus(PayrollRunStatus status) {
+        return com.company.hrms.contracts.payroll.PayrollRunStatus.valueOf(status.name());
     }
 
     private com.company.hrms.payroll.model.PayrollPeriodStatus toApiPayrollPeriodStatus(PayrollPeriodStatus status) {

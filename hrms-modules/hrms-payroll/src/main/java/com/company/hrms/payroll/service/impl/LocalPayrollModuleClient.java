@@ -4,13 +4,13 @@ import com.company.hrms.payroll.model.*;
 import com.company.hrms.payroll.repository.*;
 import com.company.hrms.payroll.service.*;
 
+import com.company.hrms.contracts.payroll.PayrollRunViewDto;
+import com.company.hrms.contracts.payroll.PayslipViewDto;
 import com.company.hrms.payroll.model.AttachPayrollEmployeeRecordCommandDto;
 import com.company.hrms.payroll.model.DefinePayrollPeriodCommandDto;
 import com.company.hrms.payroll.service.PayrollModuleApi;
 import com.company.hrms.payroll.service.PayrollModuleClient;
 import com.company.hrms.payroll.model.PayrollPeriodViewDto;
-import com.company.hrms.payroll.model.PayrollRunViewDto;
-import com.company.hrms.payroll.model.PayslipViewDto;
 import com.company.hrms.payroll.model.ReviewPayrollRunCommandDto;
 import com.company.hrms.payroll.model.StartPayrollRunCommandDto;
 import com.company.hrms.payroll.model.SubmitPayrollRunCommandDto;

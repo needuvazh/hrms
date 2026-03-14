@@ -32,6 +32,7 @@ include(":hrms-platform:hrms-shared-kernel")
 include(":hrms-platform:hrms-audit")
 
 include(":hrms-modules")
+include(":hrms-modules:hrms-contracts")
 include(":hrms-modules:hrms-tenant")
 include(":hrms-modules:hrms-auth")
 include(":hrms-modules:hrms-master-data")

@@ -4,10 +4,10 @@ import com.company.hrms.wps.model.*;
 import com.company.hrms.wps.repository.*;
 import com.company.hrms.wps.service.*;
 
+import com.company.hrms.contracts.payroll.PayrollRunStatus;
+import com.company.hrms.contracts.payroll.PayrollRunViewDto;
+import com.company.hrms.contracts.payroll.PayslipViewDto;
 import com.company.hrms.payroll.service.PayrollModuleApi;
-import com.company.hrms.payroll.model.PayrollRunViewDto;
-import com.company.hrms.payroll.model.PayrollRunStatus;
-import com.company.hrms.payroll.model.PayslipViewDto;
 import com.company.hrms.platform.starter.error.exception.HrmsException;
 import com.company.hrms.platform.starter.tenancy.api.TenantContextAccessor;
 import com.company.hrms.wps.model.CreateWpsBatchCommandDto;

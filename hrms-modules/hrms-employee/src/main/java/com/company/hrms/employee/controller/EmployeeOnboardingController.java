@@ -3,7 +3,7 @@ package com.company.hrms.employee.controller;
 import com.company.hrms.employee.model.*;
 import com.company.hrms.employee.service.*;
 
-import com.company.hrms.document.model.DocumentType;
+import com.company.hrms.contracts.document.DocumentType;
 import com.company.hrms.employee.model.EmployeeOnboardingApi;
 import com.company.hrms.employee.model.EmployeeOnboardingCommandDto;
 import com.company.hrms.employee.model.EmployeeOnboardingViewDto;

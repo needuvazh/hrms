@@ -1,6 +1,6 @@
 package com.company.hrms.pasi.model;
 
-import com.company.hrms.payroll.model.PayrollEmployeeRecordViewDto;
+import com.company.hrms.contracts.payroll.PayrollEmployeeRecordViewDto;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import org.springframework.stereotype.Component;

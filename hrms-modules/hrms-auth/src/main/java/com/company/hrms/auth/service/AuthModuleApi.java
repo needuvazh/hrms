@@ -1,6 +1,7 @@
 package com.company.hrms.auth.service;
 
 import com.company.hrms.auth.model.*;
+import com.company.hrms.contracts.auth.ProvisionUserAccountCommandDto;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

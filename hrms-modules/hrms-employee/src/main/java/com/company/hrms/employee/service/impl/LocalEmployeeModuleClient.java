@@ -4,7 +4,7 @@ import com.company.hrms.employee.model.*;
 import com.company.hrms.employee.repository.*;
 import com.company.hrms.employee.service.*;
 
-import com.company.hrms.employee.model.CreateEmployeeCommandDto;
+import com.company.hrms.contracts.employee.CreateEmployeeCommandDto;
 import com.company.hrms.employee.service.EmployeeModuleApi;
 import com.company.hrms.employee.service.EmployeeModuleClient;
 import com.company.hrms.employee.model.EmployeeSearchQueryDto;

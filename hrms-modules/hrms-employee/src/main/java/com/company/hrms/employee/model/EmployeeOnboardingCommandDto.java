@@ -1,6 +1,6 @@
 package com.company.hrms.employee.model;
 
-import com.company.hrms.document.model.DocumentType;
+import com.company.hrms.contracts.document.DocumentType;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;

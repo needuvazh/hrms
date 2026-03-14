@@ -196,7 +196,7 @@ class MonolithSecurityAuthorizationTest {
         EmployeeModuleApi employeeModuleApi() {
             return new EmployeeModuleApi() {
                 @Override
-                public Mono<EmployeeViewDto> createEmployee(com.company.hrms.employee.model.CreateEmployeeCommandDto command) {
+                public Mono<EmployeeViewDto> createEmployee(com.company.hrms.contracts.employee.CreateEmployeeCommandDto command) {
                     return Mono.just(new EmployeeViewDto(
                             UUID.randomUUID(),
                             "default",

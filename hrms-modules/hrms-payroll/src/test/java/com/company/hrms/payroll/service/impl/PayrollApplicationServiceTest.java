@@ -4,14 +4,14 @@ import com.company.hrms.payroll.model.*;
 import com.company.hrms.payroll.repository.*;
 import com.company.hrms.payroll.service.*;
 
-import com.company.hrms.document.model.AttachDocumentCommandDto;
+import com.company.hrms.contracts.document.AttachDocumentCommandDto;
+import com.company.hrms.contracts.document.ExpiryDateDto;
+import com.company.hrms.contracts.document.VerificationStatus;
 import com.company.hrms.document.model.DocumentExpiryQueryDto;
 import com.company.hrms.document.model.DocumentListQueryDto;
 import com.company.hrms.document.service.DocumentModuleApi;
 import com.company.hrms.document.model.DocumentRecordViewDto;
-import com.company.hrms.document.model.ExpiryDateDto;
 import com.company.hrms.document.model.StorageReferenceDto;
-import com.company.hrms.document.model.VerificationStatus;
 import com.company.hrms.notification.model.CreateNotificationCommandDto;
 import com.company.hrms.notification.service.NotificationModuleApi;
 import com.company.hrms.notification.model.NotificationViewDto;
@@ -31,8 +31,8 @@ import com.company.hrms.payroll.model.PayrollPeriodDto;
 import com.company.hrms.payroll.model.PayrollPeriodStatus;
 import com.company.hrms.payroll.repository.PayrollRepository;
 import com.company.hrms.payroll.model.PayrollRunDto;
-import com.company.hrms.payroll.model.PayrollRunStatus;
 import com.company.hrms.payroll.model.PayslipDto;
+import com.company.hrms.contracts.payroll.PayrollRunStatus;
 import com.company.hrms.platform.audit.api.AuditEvent;
 import com.company.hrms.platform.audit.api.AuditEventPublisher;
 import com.company.hrms.platform.featuretoggle.api.EnablementGuard;
@@ -42,12 +42,12 @@ import com.company.hrms.platform.outbox.api.OutboxPublisher;
 import com.company.hrms.platform.starter.error.exception.HrmsException;
 import com.company.hrms.platform.starter.tenancy.context.DefaultTenantContextAccessor;
 import com.company.hrms.platform.starter.tenancy.context.ReactorTenantContext;
-import com.company.hrms.workflow.model.AdvanceWorkflowCommandDto;
-import com.company.hrms.workflow.model.StartWorkflowCommandDto;
+import com.company.hrms.contracts.workflow.AdvanceWorkflowCommandDto;
+import com.company.hrms.contracts.workflow.StartWorkflowCommandDto;
 import com.company.hrms.workflow.model.WorkflowInstanceViewDto;
 import com.company.hrms.workflow.service.WorkflowModuleApi;
 import com.company.hrms.workflow.model.ApprovalStatus;
-import com.company.hrms.workflow.model.WorkflowAction;
+import com.company.hrms.contracts.workflow.WorkflowAction;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -330,13 +330,13 @@ class PayrollApplicationServiceTest {
             return Mono.just(new DocumentRecordViewDto(
                     id,
                     "default",
-                    command.documentType(),
+                    com.company.hrms.document.model.DocumentType.valueOf(command.documentType().name()),
                     command.entityType(),
                     command.entityId(),
                     command.fileName(),
                     new StorageReferenceDto("local-dev", "hrms-local", command.objectKey(), command.checksum(), command.contentType(), command.sizeBytes()),
-                    command.expiryDate(),
-                    VerificationStatus.PENDING,
+                    command.expiryDate() == null ? com.company.hrms.document.model.ExpiryDateDto.empty() : new com.company.hrms.document.model.ExpiryDateDto(command.expiryDate().value()),
+                    com.company.hrms.document.model.VerificationStatus.PENDING,
                     false,
                     now,
                     command.createdBy(),

@@ -4,7 +4,7 @@ import com.company.hrms.recruitment.model.*;
 import com.company.hrms.recruitment.repository.*;
 import com.company.hrms.recruitment.service.*;
 
-import com.company.hrms.employee.model.CreateEmployeeCommandDto;
+import com.company.hrms.contracts.employee.CreateEmployeeCommandDto;
 import com.company.hrms.employee.service.EmployeeModuleClient;
 import com.company.hrms.platform.audit.api.AuditEvent;
 import com.company.hrms.platform.audit.api.AuditEventPublisher;

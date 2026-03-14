@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    api(project(":hrms-modules:hrms-contracts"))
     implementation(project(":hrms-platform:hrms-shared-kernel"))
     api(project(":hrms-platform:hrms-starter-tenancy"))
     implementation(project(":hrms-platform:hrms-starter-error"))

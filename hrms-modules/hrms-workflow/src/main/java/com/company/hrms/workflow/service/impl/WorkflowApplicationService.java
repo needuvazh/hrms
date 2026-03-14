@@ -4,12 +4,12 @@ import com.company.hrms.workflow.model.*;
 import com.company.hrms.workflow.repository.*;
 import com.company.hrms.workflow.service.*;
 
+import com.company.hrms.contracts.workflow.AdvanceWorkflowCommandDto;
+import com.company.hrms.contracts.workflow.StartWorkflowCommandDto;
+import com.company.hrms.contracts.workflow.WorkflowAction;
 import com.company.hrms.platform.starter.error.exception.HrmsException;
 import com.company.hrms.platform.starter.tenancy.api.TenantContextAccessor;
-import com.company.hrms.workflow.model.AdvanceWorkflowCommandDto;
 import com.company.hrms.workflow.model.ApprovalStatus;
-import com.company.hrms.workflow.model.StartWorkflowCommandDto;
-import com.company.hrms.workflow.model.WorkflowAction;
 import com.company.hrms.workflow.model.WorkflowInstanceViewDto;
 import com.company.hrms.workflow.service.WorkflowModuleApi;
 import com.company.hrms.workflow.model.WorkflowDefinitionDto;

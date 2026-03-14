@@ -4,17 +4,17 @@ import com.company.hrms.document.model.*;
 import com.company.hrms.document.repository.*;
 import com.company.hrms.document.service.*;
 
-import com.company.hrms.document.model.AttachDocumentCommandDto;
+import com.company.hrms.contracts.document.AttachDocumentCommandDto;
+import com.company.hrms.contracts.document.DocumentType;
+import com.company.hrms.contracts.document.ExpiryDateDto;
+import com.company.hrms.contracts.document.VerificationStatus;
 import com.company.hrms.document.model.DocumentExpiryQueryDto;
 import com.company.hrms.document.model.DocumentListQueryDto;
 import com.company.hrms.document.model.DocumentRecordDto;
 import com.company.hrms.document.repository.DocumentRepository;
 import com.company.hrms.document.model.DocumentStorageAdapter;
-import com.company.hrms.document.model.DocumentType;
-import com.company.hrms.document.model.ExpiryDateDto;
 import com.company.hrms.document.model.StorageReferenceDto;
 import com.company.hrms.document.model.StorageRegistrationRequestDto;
-import com.company.hrms.document.model.VerificationStatus;
 import com.company.hrms.platform.starter.error.exception.HrmsException;
 import com.company.hrms.platform.starter.tenancy.context.DefaultTenantContextAccessor;
 import com.company.hrms.platform.starter.tenancy.context.ReactorTenantContext;
@@ -61,7 +61,7 @@ class DocumentApplicationServiceTest {
                         "tenant-a".equals(view.tenantId())
                                 && "EMPLOYEE".equals(view.entityType())
                                 && "EMP-101".equals(view.entityId())
-                                && DocumentType.EMPLOYMENT_CONTRACT == view.documentType())
+                                && DocumentType.EMPLOYMENT_CONTRACT.name().equals(view.documentType().name()))
                 .verifyComplete();
 
         StepVerifier.create(documentApplicationService.listDocuments(new DocumentListQueryDto("employee", "EMP-101", false))

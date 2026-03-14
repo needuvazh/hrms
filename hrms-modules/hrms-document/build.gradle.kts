@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    api(project(":hrms-modules:hrms-contracts"))
     api(project(":hrms-platform:hrms-starter-tenancy"))
     implementation(project(":hrms-platform:hrms-starter-error"))
     implementation("org.springframework.boot:spring-boot-starter")

@@ -1,6 +1,7 @@
 package com.company.hrms.document.service;
 
 import com.company.hrms.document.model.*;
+import com.company.hrms.contracts.document.AttachDocumentCommandDto;
 
 import java.util.UUID;
 import reactor.core.publisher.Flux;

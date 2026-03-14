@@ -5,7 +5,7 @@ import com.company.hrms.auth.repository.*;
 import com.company.hrms.auth.service.*;
 
 import com.company.hrms.auth.model.AuthTokenCommandDto;
-import com.company.hrms.auth.model.ProvisionUserAccountCommandDto;
+import com.company.hrms.contracts.auth.ProvisionUserAccountCommandDto;
 import com.company.hrms.auth.repository.AuthRepository;
 import com.company.hrms.auth.model.PermissionDto;
 import com.company.hrms.auth.model.RoleDto;

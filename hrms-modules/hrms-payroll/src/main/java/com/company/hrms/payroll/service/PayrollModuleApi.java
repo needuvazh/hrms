@@ -1,6 +1,8 @@
 package com.company.hrms.payroll.service;
 
 import com.company.hrms.payroll.model.*;
+import com.company.hrms.contracts.payroll.PayrollRunViewDto;
+import com.company.hrms.contracts.payroll.PayslipViewDto;
 
 import java.util.UUID;
 import reactor.core.publisher.Flux;

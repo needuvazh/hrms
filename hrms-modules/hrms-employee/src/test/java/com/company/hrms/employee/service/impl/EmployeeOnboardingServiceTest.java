@@ -17,14 +17,15 @@ import com.company.hrms.auth.service.AuthModuleApi;
 import com.company.hrms.auth.model.AuthTokenCommandDto;
 import com.company.hrms.auth.model.AuthTokenViewDto;
 import com.company.hrms.auth.model.CurrentUserViewDto;
-import com.company.hrms.auth.model.ProvisionUserAccountCommandDto;
+import com.company.hrms.contracts.auth.ProvisionUserAccountCommandDto;
 import com.company.hrms.auth.model.ProvisionedUserAccountViewDto;
 import com.company.hrms.auth.model.RoleViewDto;
-import com.company.hrms.document.model.AttachDocumentCommandDto;
+import com.company.hrms.contracts.document.AttachDocumentCommandDto;
 import com.company.hrms.document.model.DocumentExpiryQueryDto;
 import com.company.hrms.document.model.DocumentListQueryDto;
 import com.company.hrms.document.service.DocumentModuleApi;
 import com.company.hrms.document.model.DocumentRecordViewDto;
+import com.company.hrms.contracts.employee.CreateEmployeeCommandDto;
 import com.company.hrms.employee.service.EmployeeModuleApi;
 import com.company.hrms.employee.model.EmployeeOnboardingCommandDto;
 import com.company.hrms.employee.model.EmployeeOnboardingViewDto;
@@ -49,8 +50,8 @@ import com.company.hrms.platform.audit.api.AuditEventPublisher;
 import com.company.hrms.platform.starter.error.exception.HrmsException;
 import com.company.hrms.platform.starter.tenancy.context.DefaultTenantContextAccessor;
 import com.company.hrms.platform.starter.tenancy.context.ReactorTenantContext;
-import com.company.hrms.workflow.model.AdvanceWorkflowCommandDto;
-import com.company.hrms.workflow.model.StartWorkflowCommandDto;
+import com.company.hrms.contracts.workflow.AdvanceWorkflowCommandDto;
+import com.company.hrms.contracts.workflow.StartWorkflowCommandDto;
 import com.company.hrms.workflow.model.WorkflowInstanceViewDto;
 import com.company.hrms.workflow.service.WorkflowModuleApi;
 import com.company.hrms.workflow.model.ApprovalStatus;
@@ -166,7 +167,7 @@ class EmployeeOnboardingServiceTest {
 
     static class StubEmployeeModuleApi implements EmployeeModuleApi {
         @Override
-        public Mono<EmployeeViewDto> createEmployee(com.company.hrms.employee.model.CreateEmployeeCommandDto command) {
+        public Mono<EmployeeViewDto> createEmployee(CreateEmployeeCommandDto command) {
             return Mono.just(new EmployeeViewDto(
                     UUID.randomUUID(),
                     "default",
