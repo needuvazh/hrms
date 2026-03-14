@@ -1,7 +1,7 @@
 package com.company.hrms.recruitment.application;
 
 import com.company.hrms.employee.api.CreateEmployeeCommand;
-import com.company.hrms.employee.api.EmployeeModuleApi;
+import com.company.hrms.employee.api.EmployeeModuleClient;
 import com.company.hrms.platform.audit.api.AuditEvent;
 import com.company.hrms.platform.audit.api.AuditEventPublisher;
 import com.company.hrms.platform.featuretoggle.api.EnablementGuard;
@@ -34,7 +34,7 @@ public class RecruitmentApplicationService implements RecruitmentModuleApi {
     private static final int DEFAULT_LIMIT = 50;
 
     private final RecruitmentRepository recruitmentRepository;
-    private final EmployeeModuleApi employeeModuleApi;
+    private final EmployeeModuleClient employeeModuleClient;
     private final TenantContextAccessor tenantContextAccessor;
     private final EnablementGuard enablementGuard;
     private final AuditEventPublisher auditEventPublisher;
@@ -42,14 +42,14 @@ public class RecruitmentApplicationService implements RecruitmentModuleApi {
 
     public RecruitmentApplicationService(
             RecruitmentRepository recruitmentRepository,
-            EmployeeModuleApi employeeModuleApi,
+            EmployeeModuleClient employeeModuleClient,
             TenantContextAccessor tenantContextAccessor,
             EnablementGuard enablementGuard,
             AuditEventPublisher auditEventPublisher,
             OutboxPublisher outboxPublisher
     ) {
         this.recruitmentRepository = recruitmentRepository;
-        this.employeeModuleApi = employeeModuleApi;
+        this.employeeModuleClient = employeeModuleClient;
         this.tenantContextAccessor = tenantContextAccessor;
         this.enablementGuard = enablementGuard;
         this.auditEventPublisher = auditEventPublisher;
@@ -188,7 +188,7 @@ public class RecruitmentApplicationService implements RecruitmentModuleApi {
                                         "Candidate must be in OFFER or OFFER_ACCEPTED status before hiring"));
                             }
 
-                            return employeeModuleApi.createEmployee(new CreateEmployeeCommand(
+                            return employeeModuleClient.createEmployee(new CreateEmployeeCommand(
                                             command.employeeCode(),
                                             candidate.firstName(),
                                             candidate.lastName(),

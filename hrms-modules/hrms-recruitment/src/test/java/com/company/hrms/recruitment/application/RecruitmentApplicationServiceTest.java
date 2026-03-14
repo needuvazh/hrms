@@ -1,7 +1,7 @@
 package com.company.hrms.recruitment.application;
 
 import com.company.hrms.employee.api.CreateEmployeeCommand;
-import com.company.hrms.employee.api.EmployeeModuleApi;
+import com.company.hrms.employee.api.EmployeeModuleClient;
 import com.company.hrms.employee.api.EmployeeSearchQuery;
 import com.company.hrms.employee.api.EmployeeView;
 import com.company.hrms.platform.audit.api.AuditEvent;
@@ -137,7 +137,7 @@ class RecruitmentApplicationServiceTest {
         }
     }
 
-    static class RecordingEmployeeModuleApi implements EmployeeModuleApi {
+    static class RecordingEmployeeModuleApi implements EmployeeModuleClient {
         private volatile CreateEmployeeCommand lastCreateCommand;
 
         @Override
