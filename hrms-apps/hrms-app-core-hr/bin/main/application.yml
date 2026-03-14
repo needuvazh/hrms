@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: hrms-app-core-hr
+  r2dbc:
+    url: ${HRMS_R2DBC_URL:r2dbc:postgresql://localhost:5432/hrms}
+    username: ${HRMS_DB_USERNAME:hrms}
+    password: ${HRMS_DB_PASSWORD:hrms}
+  flyway:
+    enabled: true
+    url: ${HRMS_JDBC_URL:jdbc:postgresql://localhost:5432/hrms}
+    user: ${HRMS_DB_USERNAME:hrms}
+    password: ${HRMS_DB_PASSWORD:hrms}
+    locations:
+      - classpath:db/migration/tenant
+      - classpath:db/migration/auth
+      - classpath:db/migration/master-data
+      - classpath:db/migration/employee
+      - classpath:db/migration/document
+      - classpath:db/migration/outbox
+      - classpath:db/migration/audit
+
+hrms:
+  security:
+    jwt:
+      issuer: ${HRMS_JWT_ISSUER:hrms-core-hr}
+      secret: ${HRMS_JWT_SECRET:change-this-very-secret-key-123456789}
+      expiry-seconds: ${HRMS_JWT_EXPIRY_SECONDS:3600}
+
+management:
+  endpoint:
+    health:
+      show-details: when_authorized
+      probes:
+        enabled: true
+    env:
+      enabled: false
+    configprops:
+      enabled: false
+  endpoints:
+    web:
+      base-path: /actuator
+      exposure:
+        include: health,info,metrics
+  tracing:
+    enabled: true
+    sampling:
+      probability: ${HRMS_TRACING_SAMPLING_PROBABILITY:0.10}
+
+logging:
+  level:
+    root: INFO
+    com.company.hrms: INFO
