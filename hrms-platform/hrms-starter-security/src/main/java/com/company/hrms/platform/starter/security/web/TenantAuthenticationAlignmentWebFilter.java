@@ -2,6 +2,7 @@ package com.company.hrms.platform.starter.security.web;
 
 import com.company.hrms.platform.sharedkernel.web.HrmsHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
@@ -16,13 +17,11 @@ public class TenantAuthenticationAlignmentWebFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String requestTenant = exchange.getRequest().getHeaders().getFirst(HrmsHeaders.TENANT_ID);
 
-        return org.springframework.security.core.context.ReactiveSecurityContextHolder.getContext()
+        return ReactiveSecurityContextHolder.getContext()
                 .map(securityContext -> securityContext.getAuthentication())
                 .filter(authentication -> authentication instanceof JwtAuthenticationToken)
                 .cast(JwtAuthenticationToken.class)
-                .map(JwtAuthenticationToken::getToken)
-                .map(jwt -> jwt.getClaimAsString("tenant"))
-                .switchIfEmpty(Mono.justOrEmpty(requestTenant))
+                .flatMap(jwtAuthenticationToken -> Mono.justOrEmpty(jwtAuthenticationToken.getToken().getClaimAsString("tenant")))
                 .flatMap(tokenTenant -> {
                     if (StringUtils.hasText(requestTenant)
                             && StringUtils.hasText(tokenTenant)
@@ -30,6 +29,7 @@ public class TenantAuthenticationAlignmentWebFilter implements WebFilter {
                         return Mono.error(new ResponseStatusException(HttpStatus.FORBIDDEN, "Tenant header/token mismatch"));
                     }
                     return chain.filter(exchange);
-                });
+                })
+                .switchIfEmpty(chain.filter(exchange));
     }
 }
