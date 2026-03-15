@@ -1,0 +1,10 @@
+.git
+.gradle
+build
+!hrms-apps/hrms-app-monolith/build
+*.log
+*.tmp
+*.bak
+.DS_Store
+.idea
+*.iml
