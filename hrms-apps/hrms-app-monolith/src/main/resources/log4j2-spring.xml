@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" monitorInterval="60">
+    <Properties>
+        <Property name="APP_NAME">${spring:spring.application.name:-hrms-app-monolith}</Property>
+        <Property name="ROOT_LOG_LEVEL">${env:HRMS_LOG_LEVEL_ROOT:-INFO}</Property>
+        <Property name="SPRING_LOG_LEVEL">${env:HRMS_LOG_LEVEL_SPRING:-INFO}</Property>
+        <Property name="HRMS_LOG_LEVEL">${env:HRMS_LOG_LEVEL_HRMS:-INFO}</Property>
+        <Property name="PATTERN">%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} level=%p app=${APP_NAME} trace=%X{traceId:-n/a} span=%X{spanId:-n/a} correlation=%X{correlation_id:-n/a} tenant=%X{tenant_id:-n/a} thread=%t logger=%c msg=%m%ex{short}%n</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${PATTERN}"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="org.springframework" level="${SPRING_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.platform" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.tenant" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.auth" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.masterdata" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.person" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.employee" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.recruitment" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.attendance" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.leave" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.workflow" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.notification" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.document" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.payroll" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.wps" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.pasi" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.reporting" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.integrationhub" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.organization" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Logger name="com.company.hrms.jobarchitecture" level="${HRMS_LOG_LEVEL}" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Root level="${ROOT_LOG_LEVEL}">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

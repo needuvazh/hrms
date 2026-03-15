@@ -11,7 +11,7 @@ public class WebfluxCorsProperties {
     private List<String> allowedOriginPatterns = List.of("http://localhost:*", "http://127.0.0.1:*");
     private List<String> allowedMethods = List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
     private List<String> allowedHeaders = List.of("Content-Type", "Authorization", "X-Tenant-Id", "X-Tenant-Key");
-    private List<String> exposedHeaders = List.of("Authorization");
+    private List<String> exposedHeaders = List.of("Authorization", "X-Correlation-Id", "X-Trace-Id", "X-Span-Id");
     private boolean allowCredentials = true;
     private Duration maxAge = Duration.ofHours(1);
 
