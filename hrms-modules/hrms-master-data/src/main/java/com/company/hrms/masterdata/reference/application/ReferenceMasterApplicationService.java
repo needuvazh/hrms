@@ -68,15 +68,29 @@ public class ReferenceMasterApplicationService implements ReferenceMasterService
     public Mono<PagedResult<ReferenceMasterViewDto>> list(ReferenceResource resource, ReferenceSearchQuery query) {
         int safePage = Math.max(query.page(), 0);
         int safeSize = Math.min(Math.max(query.size(), 1), 200);
-        ReferenceSearchQuery normalized = new ReferenceSearchQuery(query.q(), query.active(), safePage, safeSize, query.sort(), query.skillCategoryId());
+        ReferenceSearchQuery normalized = new ReferenceSearchQuery(
+                query.q(),
+                query.active(),
+                safePage,
+                safeSize,
+                query.sort(),
+                query.skillCategoryId(),
+                query.all());
         return repository.list(resource, normalized).map(mapper::toView).collectList()
                 .zipWith(repository.count(resource, normalized))
-                .map(tuple -> new PagedResult<>(
-                        tuple.getT1(),
-                        safePage,
-                        safeSize,
-                        tuple.getT2(),
-                        tuple.getT2() == 0 ? 0 : (int) Math.ceil((double) tuple.getT2() / safeSize)));
+                .map(tuple -> {
+                    int responsePage = normalized.all() ? 0 : safePage;
+                    int responseSize = normalized.all() ? tuple.getT1().size() : safeSize;
+                    int totalPages = normalized.all()
+                            ? (tuple.getT2() == 0 ? 0 : 1)
+                            : (tuple.getT2() == 0 ? 0 : (int) Math.ceil((double) tuple.getT2() / safeSize));
+                    return new PagedResult<>(
+                            tuple.getT1(),
+                            responsePage,
+                            responseSize,
+                            tuple.getT2(),
+                            totalPages);
+                });
     }
 
     @Override

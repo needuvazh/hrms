@@ -70,6 +70,7 @@ Detailed startup guide: [docs/startup/local-development.md](/Users/praveenkumar/
 - MVP completion review: [docs/reviews/mvp-rc1-review.md](/Users/praveenkumar/Documents/Project/Freelance/hrms/docs/reviews/mvp-rc1-review.md)
 - ADRs: `/docs/adr`
 - Observability/health: [docs/operations/observability-and-health.md](/Users/praveenkumar/Documents/Project/Freelance/hrms/docs/operations/observability-and-health.md)
+- Logging policy: [docs/operations/logging-policy.md](/Users/praveenkumar/Documents/Project/Freelance/hrms/docs/operations/logging-policy.md)
 - Module extraction strategy: [docs/architecture/module-extraction-strategy.md](/Users/praveenkumar/Documents/Project/Freelance/hrms/docs/architecture/module-extraction-strategy.md)
 
 ## Next-Step Backlog Notes

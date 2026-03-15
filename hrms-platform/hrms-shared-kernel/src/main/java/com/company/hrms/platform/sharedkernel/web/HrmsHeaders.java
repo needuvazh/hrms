@@ -4,6 +4,8 @@ public final class HrmsHeaders {
 
     public static final String TENANT_ID = "X-Tenant-Id";
     public static final String CORRELATION_ID = "X-Correlation-Id";
+    public static final String TRACE_ID = "X-Trace-Id";
+    public static final String SPAN_ID = "X-Span-Id";
 
     private HrmsHeaders() {
     }

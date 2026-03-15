@@ -18,6 +18,8 @@ spring:
       - classpath:db/migration/employee
       - classpath:db/migration/recruitment
       - classpath:db/migration/document
+      - classpath:db/migration/organization
+      - classpath:db/migration/job-architecture
       - classpath:db/migration/outbox
       - classpath:db/migration/audit
 

@@ -28,6 +28,8 @@ spring:
       - classpath:db/migration/audit
       - classpath:db/migration/document
       - classpath:db/migration/integration-hub
+      - classpath:db/migration/organization
+      - classpath:db/migration/job-architecture
 
 hrms:
   web:
@@ -36,7 +38,7 @@ hrms:
       allowed-origin-patterns: ${HRMS_WEB_CORS_ALLOWED_ORIGIN_PATTERNS:http://localhost:*,http://127.0.0.1:*}
       allowed-methods: ${HRMS_WEB_CORS_ALLOWED_METHODS:GET,POST,PUT,PATCH,DELETE,OPTIONS}
       allowed-headers: ${HRMS_WEB_CORS_ALLOWED_HEADERS:Content-Type,Authorization,X-Tenant-Id,X-Tenant-Key}
-      exposed-headers: ${HRMS_WEB_CORS_EXPOSED_HEADERS:Authorization}
+      exposed-headers: ${HRMS_WEB_CORS_EXPOSED_HEADERS:Authorization,X-Correlation-Id,X-Trace-Id,X-Span-Id}
       allow-credentials: ${HRMS_WEB_CORS_ALLOW_CREDENTIALS:true}
   security:
     jwt:

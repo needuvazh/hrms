@@ -6,6 +6,7 @@ This project now provides safer and more consistent operational defaults across 
 
 - Correlation ID is resolved from `X-Correlation-Id` or generated when absent.
 - Correlation ID is returned in response header and propagated through Reactor Context.
+- Trace and span identifiers are returned in response headers as `X-Trace-Id` and `X-Span-Id`.
 - Tenant ID is propagated through Reactor Context via tenancy filter.
 - Request completion logs include:
   - method

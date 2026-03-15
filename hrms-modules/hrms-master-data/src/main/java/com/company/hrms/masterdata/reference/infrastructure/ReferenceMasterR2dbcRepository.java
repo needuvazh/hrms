@@ -81,11 +81,16 @@ public class ReferenceMasterR2dbcRepository implements ReferenceMasterRepository
             sql.append(" AND t.skill_category_id = :skillCategoryId");
         }
         sql.append(" ORDER BY ").append(resolveSort(resource, query.sort()));
-        sql.append(" LIMIT :limit OFFSET :offset");
+        if (!query.all()) {
+            sql.append(" LIMIT :limit OFFSET :offset");
+        }
 
-        GenericExecuteSpec spec = databaseClient.sql(sql.toString())
-                .bind("limit", query.size())
-                .bind("offset", query.page() * query.size());
+        GenericExecuteSpec spec = databaseClient.sql(sql.toString());
+        if (!query.all()) {
+            spec = spec
+                    .bind("limit", query.size())
+                    .bind("offset", query.page() * query.size());
+        }
         if (StringUtils.hasText(query.q())) {
             spec = spec.bind("q", likeQuery);
         }

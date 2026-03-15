@@ -2,6 +2,229 @@ You are a senior enterprise UI architect and senior frontend developer.
 
 I am building a multi-tenant enterprise HRMS product. I want you to design and generate the frontend UI specification and implementation plan for Phase 1 SaaS platform masters.
 
+Great — here is a README-style API contract for step1-ui.md scope (Tenant, Branding, Language, Country, Country Preferences), excluding subscription/feature flag.
+# Phase 1 SaaS Masters API Contract (For UI Agent)
+## Scope
+Included:
+1. Tenant
+2. Tenant Branding
+3. Tenant Language (via reference + localization usage)
+4. Tenant Country
+5. Tenant Country Preferences
+Excluded:
+- Subscription Plan
+- Feature Flag
+---
+## Base Endpoints
+- SaaS tenant master APIs: `/api/saas/tenants`
+- Tenant country APIs (existing tenant module): `/api/v1/tenants`
+- Global reference masters: `/api/reference/{resource}`
+---
+## 1) Tenant APIs
+## Create Tenant
+`POST /api/saas/tenants`
+Request:
+```json
+{
+  "tenantCode": "acme_hr",
+  "tenantName": "Acme HR",
+  "legalName": "Acme HR Technologies LLC",
+  "contactEmail": "admin@acme.com",
+  "contactPhone": "+971501234567",
+  "defaultTimezone": "Asia/Dubai",
+  "goLiveDate": "2026-04-01",
+  "defaultLanguageCode": "en",
+  "homeCountryCode": "AE"
+}
+Response (TenantViewDto):
+{
+  "tenantCode": "acme_hr",
+  "tenantName": "Acme HR",
+  "legalName": "Acme HR Technologies LLC",
+  "contactEmail": "admin@acme.com",
+  "contactPhone": "+971501234567",
+  "defaultTimezone": "Asia/Dubai",
+  "goLiveDate": "2026-04-01",
+  "defaultLanguageCode": "en",
+  "homeCountryCode": "AE",
+  "active": true,
+  "createdAt": "2026-03-15T10:00:00Z",
+  "updatedAt": "2026-03-15T10:00:00Z",
+  "createdBy": "system",
+  "updatedBy": "system"
+}
+Update Tenant
+PUT /api/saas/tenants/{tenantCode}  
+Request/response same as create.
+Get Tenant
+GET /api/saas/tenants/{tenantCode}  
+Response: TenantViewDto (same shape above)
+List Tenants
+GET /api/saas/tenants?q=&active=&page=0&size=20&sort=&all=false
+Response (PagedResult<TenantViewDto>):
+{
+  "items": [ /* TenantViewDto[] */ ],
+  "page": 0,
+  "size": 20,
+  "totalElements": 1,
+  "totalPages": 1
+}
+Activate/Deactivate Tenant
+PATCH /api/saas/tenants/{tenantCode}/status
+Request:
+{ "active": true }
+Response: 204 No Content
+---
+2) Tenant Branding APIs
+Upsert Branding
+PUT /api/saas/tenants/{tenantCode}/branding
+Request (TenantBrandingUpsertRequest):
+{
+  "brandName": "Acme HR",
+  "logoUrl": "https://cdn.example.com/logo.png",
+  "faviconUrl": "https://cdn.example.com/favicon.ico",
+  "primaryColor": "#0A4D8C",
+  "secondaryColor": "#F59E0B",
+  "loginBannerUrl": "https://cdn.example.com/banner.png",
+  "emailLogoUrl": "https://cdn.example.com/email-logo.png",
+  "active": true
+}
+Response (TenantBrandingViewDto):
+{
+  "tenantCode": "acme_hr",
+  "brandName": "Acme HR",
+  "logoUrl": "https://cdn.example.com/logo.png",
+  "faviconUrl": "https://cdn.example.com/favicon.ico",
+  "primaryColor": "#0A4D8C",
+  "secondaryColor": "#F59E0B",
+  "loginBannerUrl": "https://cdn.example.com/banner.png",
+  "emailLogoUrl": "https://cdn.example.com/email-logo.png",
+  "active": true,
+  "createdAt": "2026-03-15T10:10:00Z",
+  "updatedAt": "2026-03-15T10:10:00Z",
+  "createdBy": "system",
+  "updatedBy": "system"
+}
+Get Branding
+GET /api/saas/tenants/{tenantCode}/branding  
+Response: TenantBrandingViewDto
+---
+3) Tenant Country Preference APIs (Localization)
+Upsert Country Preference
+PUT /api/saas/tenants/{tenantCode}/localization/{countryCode}
+Request (TenantLocalizationUpsertRequest):
+{
+  "defaultLanguageCode": "en",
+  "dateFormat": "dd/MM/yyyy",
+  "timeFormat": "HH:mm",
+  "weekStartDay": "MONDAY",
+  "currencyCode": "AED",
+  "numberFormat": "#,##0.00",
+  "rtlEnabled": false,
+  "publicHolidayCalendarCode": "AE-DXB",
+  "calendarType": "GREGORIAN",
+  "active": true
+}
+Response (TenantLocalizationViewDto):
+{
+  "id": "5b05a9f3-5f8c-4c7e-a832-18d9d0359c89",
+  "tenantCode": "acme_hr",
+  "countryCode": "AE",
+  "defaultLanguageCode": "en",
+  "dateFormat": "dd/MM/yyyy",
+  "timeFormat": "HH:mm",
+  "weekStartDay": "MONDAY",
+  "currencyCode": "AED",
+  "numberFormat": "#,##0.00",
+  "rtlEnabled": false,
+  "publicHolidayCalendarCode": "AE-DXB",
+  "calendarType": "GREGORIAN",
+  "active": true,
+  "createdAt": "2026-03-15T10:20:00Z",
+  "updatedAt": "2026-03-15T10:20:00Z",
+  "createdBy": "system",
+  "updatedBy": "system"
+}
+List Country Preferences
+GET /api/saas/tenants/{tenantCode}/localization  
+Response: TenantLocalizationViewDto[]
+---
+4) Tenant Country APIs
+List Supported Countries (global)
+GET /api/v1/tenants/countries
+Response (CountryViewDto[]):
+[
+  {
+    "countryCode": "AE",
+    "countryName": "United Arab Emirates",
+    "currencyCode": "AED",
+    "timezone": "Asia/Dubai",
+    "locale": "en-AE",
+    "active": true
+  }
+]
+List Tenant Countries
+GET /api/v1/tenants/{tenantCode}/countries
+Response (TenantCountryConfigViewDto[]):
+[
+  {
+    "tenantCode": "acme_hr",
+    "countryCode": "AE",
+    "primaryCountry": true,
+    "complianceProfile": "UAE_STANDARD",
+    "effectiveFrom": "2026-01-01",
+    "effectiveTo": null,
+    "active": true
+  }
+]
+---
+5) Tenant Language Data APIs
+Note: there is no dedicated /api/saas/tenants/{tenantCode}/languages CRUD endpoint currently.
+Use:
+1. defaultLanguageCode in tenant and localization payloads
+2. global language reference options from reference master
+Language options
+GET /api/reference/languages/options?activeOnly=true
+Response (ReferenceOptionViewDto[]):
+[
+  { "id": "uuid", "code": "en", "name": "English" },
+  { "id": "uuid", "code": "ar", "name": "Arabic" }
+]
+Also useful:
+- Countries: GET /api/reference/countries/options?activeOnly=true
+- Currencies: GET /api/reference/currencies/options?activeOnly=true
+---
+6) Optional Consolidated Settings API
+Tenant Settings Summary
+GET /api/saas/tenants/{tenantCode}/settings
+Response (TenantSettingsViewDto):
+{
+  "tenant": { /* TenantViewDto */ },
+  "subscription": null,
+  "branding": { /* TenantBrandingViewDto */ },
+  "localizationPreferences": [ /* TenantLocalizationViewDto[] */ ],
+  "enabledModules": [],
+  "enabledFeatures": []
+}
+For Step 1 UI scope, ignore subscription and enabledFeatures.
+---
+7) Validation Notes for UI
+- tenantCode: regex ^[a-z0-9_-]{2,64}$
+- tenantName, legalName, defaultTimezone: required
+- contactEmail: valid email
+- Branding brandName: required
+- Localization required: defaultLanguageCode, dateFormat, timeFormat, weekStartDay, currencyCode, numberFormat
+- Status request uses { "active": boolean }
+---
+8) Suggested Screen-to-API Mapping
+- Tenant List: GET /api/saas/tenants
+- Tenant Create/Edit: POST/PUT /api/saas/tenants...
+- Tenant Status Toggle: PATCH /api/saas/tenants/{tenantCode}/status
+- Branding Tab: GET/PUT /api/saas/tenants/{tenantCode}/branding
+- Countries Tab: GET /api/v1/tenants/countries + GET /api/v1/tenants/{tenantCode}/countries
+- Country Preferences Tab: GET /api/saas/tenants/{tenantCode}/localization + PUT /api/saas/tenants/{tenantCode}/localization/{countryCode}
+- Language dropdowns: GET /api/reference/languages/options?activeOnly=true
+
 Important scope:
 - Ignore Subscription Plan
 - Ignore Feature Flag

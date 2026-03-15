@@ -57,13 +57,15 @@ public class RequestObservabilityWebFilter implements WebFilter, Ordered {
                             .record(durationNanos, TimeUnit.NANOSECONDS);
 
                     log.info(
-                            "http_request method={} route={} status={} duration_ms={} correlation_id={} tenant_id={}",
+                            "http_request method={} route={} status={} duration_ms={} correlation_id={} tenant_id={} trace_id={} span_id={}",
                             method,
                             route,
                             statusCode,
                             TimeUnit.NANOSECONDS.toMillis(durationNanos),
                             correlationId(exchange),
-                            tenantId(exchange) == null ? "n/a" : tenantId(exchange));
+                            tenantId(exchange) == null ? "n/a" : tenantId(exchange),
+                            traceId(exchange),
+                            spanId(exchange));
                 });
     }
 
@@ -83,5 +85,15 @@ public class RequestObservabilityWebFilter implements WebFilter, Ordered {
     private String tenantId(ServerWebExchange exchange) {
         Object tenant = exchange.getAttribute(ExchangeAttributeKeys.TENANT_ID);
         return tenant == null ? null : tenant.toString();
+    }
+
+    private String traceId(ServerWebExchange exchange) {
+        Object trace = exchange.getAttribute(ExchangeAttributeKeys.TRACE_ID);
+        return trace == null ? "n/a" : trace.toString();
+    }
+
+    private String spanId(ServerWebExchange exchange) {
+        Object span = exchange.getAttribute(ExchangeAttributeKeys.SPAN_ID);
+        return span == null ? "n/a" : span.toString();
     }
 }

@@ -2,8 +2,7 @@ SYSTEM ROLE
 You are a senior enterprise UI architect and frontend engineer.
 
 STACK
-React
-TypeScript
+Flutter
 Enterprise admin UI
 
 ----------------------------------------------------
@@ -577,39 +576,6 @@ Reusable admin screen pattern
 
 ----------------------------------------------------
 
-API INTEGRATION
-
-Use endpoints
-
-GET /api/job-architecture/{master}
-POST /api/job-architecture/{master}
-PUT /api/job-architecture/{master}/{id}
-PATCH /api/job-architecture/{master}/{id}/status
-GET /api/job-architecture/{master}/options
-
-Examples
-
-GET /api/job-architecture/designations
-GET /api/job-architecture/job-families
-GET /api/job-architecture/job-functions
-GET /api/job-architecture/grades
-GET /api/job-architecture/grade-bands
-GET /api/job-architecture/positions
-
-Also use option APIs from previous steps where needed for Position:
-
-GET /api/organization/legal-entities/options
-GET /api/organization/branches/options
-GET /api/organization/business-units/options
-GET /api/organization/divisions/options
-GET /api/organization/departments/options
-GET /api/organization/sections/options
-GET /api/organization/work-locations/options
-GET /api/organization/cost-centers/options
-GET /api/organization/reporting-units/options
-
-----------------------------------------------------
-
 FILTER REQUIREMENTS
 
 List screens should support:
@@ -672,4 +638,4 @@ Return answer in this order:
 
 Make it implementation-ready.
 Do not give generic advice.
-If code examples are included, use React + TypeScript style.
+If code examples are included, use Flutter style.

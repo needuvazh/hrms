@@ -8,6 +8,405 @@ Enterprise admin UI
 
 ----------------------------------------------------
 
+Perfect — here is a README-style API contract you can hand over directly to the UI agent for Step 3 Organization Masters.
+# Step 3 Organization Masters API Contract (UI Integration)
+## Base
+- Base path: `/api/organization`
+- Content-Type: `application/json`
+- IDs are UUIDs
+- All APIs are tenant-scoped in backend context (UI should send tenant context headers/token as configured in app shell)
+---
+## Common Patterns
+### List API (all masters)
+`GET /api/organization/{resource}`
+Query params:
+- `q` (optional, string): search keyword
+- `active` (optional, boolean): filter by active state
+- `limit` (optional, int, default `50`)
+- `offset` (optional, int, default `0`)
+Response:
+- `200 OK`
+- JSON array of master DTO objects
+### Get by ID
+`GET /api/organization/{resource}/{id}`
+Response:
+- `200 OK`
+- JSON object (master DTO)
+### Create
+`POST /api/organization/{resource}`
+Response:
+- `200 OK`
+- JSON object (created master DTO)
+### Update
+`PUT /api/organization/{resource}/{id}`
+Response:
+- `200 OK`
+- JSON object (updated master DTO)
+### Status Toggle
+`PATCH /api/organization/{resource}/{id}/status`
+Request:
+```json
+{ "active": true }
+Response:
+- 200 OK
+- JSON object (updated master DTO)
+Options
+GET /api/organization/{resource}/options
+Query params:
+- q (optional, string)
+- limit (optional, int, default 100)
+Response:
+[
+  { "id": "uuid", "code": "CODE", "name": "Display Name" }
+]
+---
+## Endpoint Map
+- Legal Entity: `legal-entities`
+- Branch: `branches`
+- Business Unit: `business-units`
+- Division: `divisions`
+- Department: `departments`
+- Section: `sections`
+- Work Location: `work-locations`
+- Cost Center: `cost-centers`
+- Reporting Unit: `reporting-units`
+---
+Request Objects
+1) Legal Entity
+POST/PUT body:
+{
+  "legalEntityCode": "LE-001",
+  "legalEntityName": "Acme Legal Entity",
+  "shortName": "Acme LE",
+  "registrationNo": "REG-123",
+  "taxNo": "TAX-123",
+  "countryCode": "AE",
+  "baseCurrencyCode": "AED",
+  "defaultLanguageCode": "en",
+  "contactEmail": "admin@acme.com",
+  "contactPhone": "+971500000000",
+  "addressLine1": "Address 1",
+  "addressLine2": "Address 2",
+  "city": "Dubai",
+  "state": "Dubai",
+  "postalCode": "00000",
+  "active": true
+}
+2) Branch
+{
+  "legalEntityId": "uuid",
+  "branchCode": "BR-001",
+  "branchName": "Dubai Branch",
+  "branchShortName": "DXB",
+  "addressLine1": "Address 1",
+  "addressLine2": "Address 2",
+  "city": "Dubai",
+  "state": "Dubai",
+  "countryCode": "AE",
+  "postalCode": "00000",
+  "phone": "+971500000000",
+  "fax": "+971400000000",
+  "email": "branch@acme.com",
+  "active": true
+}
+3) Business Unit
+{
+  "legalEntityId": "uuid",
+  "businessUnitCode": "BU-001",
+  "businessUnitName": "Corporate BU",
+  "description": "Corporate functions",
+  "active": true
+}
+legalEntityId is optional.
+4) Division
+{
+  "legalEntityId": "uuid",
+  "businessUnitId": "uuid",
+  "branchId": "uuid",
+  "divisionCode": "DIV-001",
+  "divisionName": "Operations",
+  "description": "Ops division",
+  "active": true
+}
+legalEntityId, businessUnitId, branchId are optional.
+5) Department
+{
+  "legalEntityId": "uuid",
+  "businessUnitId": "uuid",
+  "divisionId": "uuid",
+  "branchId": "uuid",
+  "departmentCode": "DEP-001",
+  "departmentName": "Finance",
+  "shortName": "FIN",
+  "description": "Finance department",
+  "active": true
+}
+legalEntityId, businessUnitId, divisionId, branchId are optional.
+6) Section
+{
+  "departmentId": "uuid",
+  "sectionCode": "SEC-001",
+  "sectionName": "Accounts Payable",
+  "description": "AP section",
+  "active": true
+}
+departmentId is required.
+7) Work Location
+{
+  "legalEntityId": "uuid",
+  "branchId": "uuid",
+  "locationCode": "LOC-001",
+  "locationName": "HQ Building",
+  "locationType": "OFFICE",
+  "addressLine1": "Address 1",
+  "addressLine2": "Address 2",
+  "city": "Dubai",
+  "state": "Dubai",
+  "countryCode": "AE",
+  "postalCode": "00000",
+  "latitude": 25.2048,
+  "longitude": 55.2708,
+  "geofenceRadius": 100.0,
+  "active": true
+}
+locationType enum values:
+- OFFICE
+- SITE
+- PLANT
+- WAREHOUSE
+- REMOTE
+- CLIENT_SITE
+8) Cost Center
+{
+  "legalEntityId": "uuid",
+  "costCenterCode": "CC-001",
+  "costCenterName": "Finance Cost Center",
+  "description": "Finance allocation",
+  "glAccountCode": "GL-1000",
+  "parentCostCenterId": "uuid",
+  "active": true
+}
+legalEntityId and parentCostCenterId are optional.
+9) Reporting Unit
+{
+  "reportingUnitCode": "RU-001",
+  "reportingUnitName": "Corporate Reporting",
+  "parentReportingUnitId": "uuid",
+  "description": "Top reporting unit",
+  "active": true
+}
+parentReportingUnitId is optional.
+---
+Response Objects
+All master responses include audit fields (createdAt, updatedAt, createdBy, updatedBy) and tenantId.
+LegalEntityDto
+{
+  "id": "uuid",
+  "tenantId": "default",
+  "legalEntityCode": "LE-001",
+  "legalEntityName": "Acme Legal Entity",
+  "shortName": "Acme LE",
+  "registrationNo": "REG-123",
+  "taxNo": "TAX-123",
+  "countryCode": "AE",
+  "baseCurrencyCode": "AED",
+  "defaultLanguageCode": "en",
+  "contactEmail": "admin@acme.com",
+  "contactPhone": "+971500000000",
+  "addressLine1": "Address 1",
+  "addressLine2": "Address 2",
+  "city": "Dubai",
+  "state": "Dubai",
+  "postalCode": "00000",
+  "active": true,
+  "createdAt": "2026-03-15T10:00:00Z",
+  "updatedAt": "2026-03-15T10:00:00Z",
+  "createdBy": "system",
+  "updatedBy": "system"
+}
+BranchDto
+{
+  "id": "uuid",
+  "tenantId": "default",
+  "legalEntityId": "uuid",
+  "branchCode": "BR-001",
+  "branchName": "Dubai Branch",
+  "branchShortName": "DXB",
+  "addressLine1": "Address 1",
+  "addressLine2": "Address 2",
+  "city": "Dubai",
+  "state": "Dubai",
+  "countryCode": "AE",
+  "postalCode": "00000",
+  "phone": "+971500000000",
+  "fax": "+971400000000",
+  "email": "branch@acme.com",
+  "active": true,
+  "createdAt": "2026-03-15T10:00:00Z",
+  "updatedAt": "2026-03-15T10:00:00Z",
+  "createdBy": "system",
+  "updatedBy": "system"
+}
+BusinessUnitDto
+{
+  "id": "uuid",
+  "tenantId": "default",
+  "legalEntityId": "uuid",
+  "businessUnitCode": "BU-001",
+  "businessUnitName": "Corporate BU",
+  "description": "Corporate functions",
+  "active": true,
+  "createdAt": "2026-03-15T10:00:00Z",
+  "updatedAt": "2026-03-15T10:00:00Z",
+  "createdBy": "system",
+  "updatedBy": "system"
+}
+DivisionDto
+{
+  "id": "uuid",
+  "tenantId": "default",
+  "legalEntityId": "uuid",
+  "businessUnitId": "uuid",
+  "branchId": "uuid",
+  "divisionCode": "DIV-001",
+  "divisionName": "Operations",
+  "description": "Ops division",
+  "active": true,
+  "createdAt": "2026-03-15T10:00:00Z",
+  "updatedAt": "2026-03-15T10:00:00Z",
+  "createdBy": "system",
+  "updatedBy": "system"
+}
+DepartmentDto
+{
+  "id": "uuid",
+  "tenantId": "default",
+  "legalEntityId": "uuid",
+  "businessUnitId": "uuid",
+  "divisionId": "uuid",
+  "branchId": "uuid",
+  "departmentCode": "DEP-001",
+  "departmentName": "Finance",
+  "shortName": "FIN",
+  "description": "Finance department",
+  "active": true,
+  "createdAt": "2026-03-15T10:00:00Z",
+  "updatedAt": "2026-03-15T10:00:00Z",
+  "createdBy": "system",
+  "updatedBy": "system"
+}
+SectionDto
+{
+  "id": "uuid",
+  "tenantId": "default",
+  "departmentId": "uuid",
+  "sectionCode": "SEC-001",
+  "sectionName": "Accounts Payable",
+  "description": "AP section",
+  "active": true,
+  "createdAt": "2026-03-15T10:00:00Z",
+  "updatedAt": "2026-03-15T10:00:00Z",
+  "createdBy": "system",
+  "updatedBy": "system"
+}
+WorkLocationDto
+{
+  "id": "uuid",
+  "tenantId": "default",
+  "legalEntityId": "uuid",
+  "branchId": "uuid",
+  "locationCode": "LOC-001",
+  "locationName": "HQ Building",
+  "locationType": "OFFICE",
+  "addressLine1": "Address 1",
+  "addressLine2": "Address 2",
+  "city": "Dubai",
+  "state": "Dubai",
+  "countryCode": "AE",
+  "postalCode": "00000",
+  "latitude": 25.2048,
+  "longitude": 55.2708,
+  "geofenceRadius": 100.0,
+  "active": true,
+  "createdAt": "2026-03-15T10:00:00Z",
+  "updatedAt": "2026-03-15T10:00:00Z",
+  "createdBy": "system",
+  "updatedBy": "system"
+}
+CostCenterDto
+{
+  "id": "uuid",
+  "tenantId": "default",
+  "legalEntityId": "uuid",
+  "costCenterCode": "CC-001",
+  "costCenterName": "Finance Cost Center",
+  "description": "Finance allocation",
+  "glAccountCode": "GL-1000",
+  "parentCostCenterId": "uuid",
+  "active": true,
+  "createdAt": "2026-03-15T10:00:00Z",
+  "updatedAt": "2026-03-15T10:00:00Z",
+  "createdBy": "system",
+  "updatedBy": "system"
+}
+ReportingUnitDto
+{
+  "id": "uuid",
+  "tenantId": "default",
+  "reportingUnitCode": "RU-001",
+  "reportingUnitName": "Corporate Reporting",
+  "parentReportingUnitId": "uuid",
+  "description": "Top reporting unit",
+  "active": true,
+  "createdAt": "2026-03-15T10:00:00Z",
+  "updatedAt": "2026-03-15T10:00:00Z",
+  "createdBy": "system",
+  "updatedBy": "system"
+}
+---
+Tree / Chart APIs
+GET /api/organization/tree
+GET /api/organization/chart
+Response:
+{
+  "nodes": [
+    {
+      "type": "LEGAL_ENTITY",
+      "id": "uuid",
+      "code": "LE-001",
+      "name": "Acme Legal Entity",
+      "active": true,
+      "children": [
+        {
+          "type": "BRANCH",
+          "id": "uuid",
+          "code": "BR-001",
+          "name": "Dubai Branch",
+          "active": true,
+          "children": []
+        }
+      ]
+    }
+  ]
+}
+Node shape:
+{
+  "type": "string",
+  "id": "uuid|null",
+  "code": "string",
+  "name": "string",
+  "active": true,
+  "children": [ /* same node shape */ ]
+}
+---
+UI Notes (Important)
+- List endpoints return arrays (not paged wrapper), so UI pager should be client-driven unless backend paging metadata is added later.
+- status toggle endpoint returns full updated entity object.
+- options endpoints return normalized {id, code, name} for dropdowns.
+- Use UUID type in frontend models for IDs.
+- active exists in all master request/response payloads.
+- Validation constraints currently enforced at API layer include required fields, email, lat/long ranges, geofence minimum, and hierarchy cycle prevention (cost center/reporting unit).
+
 MODULE
 Step 3 — Organization Structure Masters
 

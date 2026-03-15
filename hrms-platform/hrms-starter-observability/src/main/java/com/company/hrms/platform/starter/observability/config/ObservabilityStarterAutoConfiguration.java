@@ -4,10 +4,13 @@ import com.company.hrms.platform.starter.observability.actuator.HrmsInfoContribu
 import com.company.hrms.platform.starter.observability.web.ContextPropagatingWebClientCustomizer;
 import com.company.hrms.platform.starter.observability.web.CorrelationIdWebFilter;
 import com.company.hrms.platform.starter.observability.web.RequestObservabilityWebFilter;
+import com.company.hrms.platform.starter.observability.web.TraceResponseWebFilter;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.tracing.Tracer;
 import org.springframework.boot.actuate.info.InfoContributor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.web.reactive.function.client.WebClientCustomizer;
 import org.springframework.context.annotation.Bean;
 
@@ -24,6 +27,12 @@ public class ObservabilityStarterAutoConfiguration {
     @ConditionalOnMissingBean
     RequestObservabilityWebFilter requestObservabilityWebFilter(MeterRegistry meterRegistry) {
         return new RequestObservabilityWebFilter(meterRegistry);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    TraceResponseWebFilter traceResponseWebFilter(ObjectProvider<Tracer> tracerProvider) {
+        return new TraceResponseWebFilter(tracerProvider.getIfAvailable());
     }
 
     @Bean

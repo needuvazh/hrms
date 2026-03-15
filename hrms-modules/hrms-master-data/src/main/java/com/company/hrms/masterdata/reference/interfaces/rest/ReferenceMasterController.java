@@ -74,9 +74,10 @@ public class ReferenceMasterController {
             @RequestParam(name = "page", required = false, defaultValue = "0") int page,
             @RequestParam(name = "size", required = false, defaultValue = "20") int size,
             @RequestParam(name = "sort", required = false) String sort,
-            @RequestParam(name = "skillCategoryId", required = false) UUID skillCategoryId
+            @RequestParam(name = "skillCategoryId", required = false) UUID skillCategoryId,
+            @RequestParam(name = "all", required = false, defaultValue = "false") boolean all
     ) {
-        return service.list(resolve(resource), new ReferenceSearchQuery(q, active, page, size, sort, skillCategoryId));
+        return service.list(resolve(resource), new ReferenceSearchQuery(q, active, page, size, sort, skillCategoryId, all));
     }
 
     @PatchMapping("/{id}/status")

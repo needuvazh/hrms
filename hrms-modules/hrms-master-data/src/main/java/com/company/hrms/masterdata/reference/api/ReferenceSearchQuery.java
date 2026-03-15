@@ -8,6 +8,7 @@ public record ReferenceSearchQuery(
         int page,
         int size,
         String sort,
-        UUID skillCategoryId
+        UUID skillCategoryId,
+        boolean all
 ) {
 }
