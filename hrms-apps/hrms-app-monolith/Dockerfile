@@ -2,7 +2,17 @@ FROM eclipse-temurin:21-jdk-alpine AS builder
 
 WORKDIR /build
 
-COPY gradlew settings.gradle.kts build.gradle.kts ./
+RUN apk add --no-cache curl unzip
+
+RUN curl -sL https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -o /tmp/gradle.zip && \
+    mkdir -p /root/.gradle/wrapper/dists/gradle-8.10.2-bin/zip2 && \
+    unzip -q /tmp/gradle.zip -d /root/.gradle/wrapper/dists/gradle-8.10.2-bin/zip2 && \
+    mv /root/.gradle/wrapper/dists/gradle-8.10.2-bin/zip2/gradle-8.10.2 /root/.gradle/wrapper/dists/gradle-8.10.2-bin/zip2/unknown
+
+COPY gradle/wrapper/gradle-wrapper.properties ./gradle/wrapper/gradle-wrapper.properties
+COPY gradlew ./gradlew
+COPY gradle/wrapper/gradle-wrapper.jar ./gradle/wrapper/gradle-wrapper.jar
+COPY settings.gradle.kts build.gradle.kts ./
 COPY build-logic ./build-logic
 COPY hrms-platform ./hrms-platform
 COPY hrms-modules ./hrms-modules
