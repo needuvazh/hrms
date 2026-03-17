@@ -13,7 +13,7 @@ import reactor.test.StepVerifier;
 
 class TenantContextWebFilterTest {
 
-    private final TenantContextWebFilter tenantContextWebFilter = new TenantContextWebFilter();
+    private final TenantContextWebFilter tenantContextWebFilter = new TenantContextWebFilter("default");
 
     @Test
     void propagatesTenantIdFromHeaderToReactorContext() {
@@ -34,19 +34,18 @@ class TenantContextWebFilterTest {
     }
 
     @Test
-    void leavesReactorContextWithoutTenantWhenHeaderMissing() {
-        AtomicReference<Boolean> tenantPresent = new AtomicReference<>(true);
+    void usesDefaultTenantWhenHeaderMissing() {
+        AtomicReference<String> capturedTenant = new AtomicReference<>();
 
         ServerWebExchange exchange = MockServerWebExchange.from(
                 MockServerHttpRequest.get("/api/v1/employees").build());
 
         WebFilterChain chain = ex -> ReactorTenantContext.currentTenantId()
-                .hasElement()
-                .doOnNext(tenantPresent::set)
+                .doOnNext(capturedTenant::set)
                 .then();
 
         StepVerifier.create(tenantContextWebFilter.filter(exchange, chain)).verifyComplete();
 
-        org.junit.jupiter.api.Assertions.assertEquals(Boolean.FALSE, tenantPresent.get());
+        org.junit.jupiter.api.Assertions.assertEquals("default", capturedTenant.get());
     }
 }
