@@ -2,6 +2,7 @@ package com.company.hrms.documentpolicy.controller;
 
 import com.company.hrms.documentpolicy.model.DocumentPolicyModels;
 import com.company.hrms.documentpolicy.service.DocumentPolicyModuleApi;
+import com.company.hrms.masterdata.reference.api.PagedResult;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -59,7 +60,7 @@ public class DocumentPolicyController {
     }
 
     @GetMapping("/{resource}")
-    public Flux<DocumentPolicyModels.MasterViewDto> list(
+    public Mono<PagedResult<DocumentPolicyModels.MasterViewDto>> list(
             @PathVariable("resource") String resource,
             @RequestParam(name = "q", required = false) String q,
             @RequestParam(name = "active", required = false) Boolean active,

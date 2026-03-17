@@ -26,6 +26,8 @@ public interface WorkflowAccessRepository {
 
     Flux<WorkflowAccessModels.MasterViewDto> list(String tenantId, WorkflowAccessModels.Resource resource, WorkflowAccessModels.SearchQuery query);
 
+    Mono<Long> count(String tenantId, WorkflowAccessModels.Resource resource, WorkflowAccessModels.SearchQuery query);
+
     Mono<WorkflowAccessModels.MasterViewDto> updateStatus(
             String tenantId,
             WorkflowAccessModels.Resource resource,

@@ -2,6 +2,7 @@ package com.company.hrms.workflowaccess.controller;
 
 import com.company.hrms.workflowaccess.model.WorkflowAccessModels;
 import com.company.hrms.workflowaccess.service.WorkflowAccessModuleApi;
+import com.company.hrms.masterdata.reference.api.PagedResult;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -52,7 +53,7 @@ public class WorkflowAccessController {
     }
 
     @GetMapping("/{resource}")
-    public Flux<WorkflowAccessModels.MasterViewDto> list(
+    public Mono<PagedResult<WorkflowAccessModels.MasterViewDto>> list(
             @PathVariable("resource") String resource,
             @RequestParam(name = "q", required = false) String q,
             @RequestParam(name = "active", required = false) Boolean active,

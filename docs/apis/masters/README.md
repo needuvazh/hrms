@@ -11,5 +11,6 @@ Implementation location: `hrms-modules/hrms-master-data`.
 - `step5-compliance-masters-api.md` - Compliance-supporting HR masters
 - `step6-document-policy-masters-api.md` - Document and policy masters
 - `step7-workflow-access-masters-api.md` - Workflow and access masters
+- `step8-hr-lifecycle-support-masters-api.md` - HR-only time and lifecycle support masters
 
 All payloads are based on current backend controllers and DTOs in source code.

@@ -26,6 +26,8 @@ public interface DocumentPolicyRepository {
 
     Flux<DocumentPolicyModels.MasterViewDto> list(String tenantId, DocumentPolicyModels.Resource resource, DocumentPolicyModels.SearchQuery query);
 
+    Mono<Long> count(String tenantId, DocumentPolicyModels.Resource resource, DocumentPolicyModels.SearchQuery query);
+
     Mono<DocumentPolicyModels.MasterViewDto> updateStatus(
             String tenantId,
             DocumentPolicyModels.Resource resource,

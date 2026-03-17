@@ -100,6 +100,34 @@ public class DocumentPolicyR2dbcRepository implements DocumentPolicyRepository {
     }
 
     @Override
+    public Mono<Long> count(String tenantId, DocumentPolicyModels.Resource resource, DocumentPolicyModels.SearchQuery query) {
+        StringBuilder sql = new StringBuilder("SELECT count(*) AS cnt FROM ")
+                .append(resource.table())
+                .append(" t WHERE t.tenant_id = :tenantId");
+        String likeQuery = "%";
+        if (StringUtils.hasText(query.q())) {
+            likeQuery = "%" + query.q().trim() + "%";
+            sql.append(" AND (lower(t.").append(resource.codeColumn()).append(") LIKE lower(:q) OR lower(t.")
+                    .append(resource.nameColumn()).append(") LIKE lower(:q))");
+        }
+        if (query.active() != null) {
+            sql.append(" AND t.active = :active");
+        }
+        applyResourceFilters(sql, resource, query);
+
+        GenericExecuteSpec spec = databaseClient.sql(sql.toString())
+                .bind("tenantId", tenantId);
+        if (StringUtils.hasText(query.q())) {
+            spec = spec.bind("q", likeQuery);
+        }
+        if (query.active() != null) {
+            spec = spec.bind("active", query.active());
+        }
+        spec = bindResourceFilters(spec, resource, query);
+        return spec.map((row, metadata) -> row.get("cnt", Long.class) == null ? 0L : row.get("cnt", Long.class)).one();
+    }
+
+    @Override
     public Mono<DocumentPolicyModels.MasterViewDto> updateStatus(
             String tenantId,
             DocumentPolicyModels.Resource resource,

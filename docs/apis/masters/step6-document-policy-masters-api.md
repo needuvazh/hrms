@@ -84,7 +84,31 @@ Example expiry rule create:
 }
 ```
 
-Response payload (`MasterViewDto`) includes resource metadata + active/audit fields:
+`GET /api/document-policy/{resource}` response is paged and returns:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "tenantId": "default",
+      "code": "PASSPORT",
+      "name": "Passport",
+      "active": true,
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z",
+      "createdBy": "system",
+      "updatedBy": "system"
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalElements": 1,
+  "totalPages": 1
+}
+```
+
+Each item in `items` is `MasterViewDto` and includes resource metadata + active/audit fields:
 
 - `id`, `tenantId`, `code`, `name`
 - Resource-specific properties (document flags, rule links, alert days, policy flags, mime limits)

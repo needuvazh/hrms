@@ -5,6 +5,7 @@ import com.company.hrms.platform.audit.api.AuditEventPublisher;
 import com.company.hrms.platform.featuretoggle.api.EnablementGuard;
 import com.company.hrms.platform.starter.error.exception.HrmsException;
 import com.company.hrms.platform.starter.tenancy.api.TenantContextAccessor;
+import com.company.hrms.masterdata.reference.api.PagedResult;
 import com.company.hrms.workflowaccess.model.WorkflowAccessModels;
 import com.company.hrms.workflowaccess.repository.WorkflowAccessRepository;
 import java.util.Map;
@@ -43,7 +44,7 @@ public class WorkflowAccessApplicationService implements com.company.hrms.workfl
         return withTenant(resource)
                 .flatMap(tenantId -> validate(tenantId, resource, request)
                         .then(requireCode(resource, request.code()))
-                        .then(repository.codeExists(tenantId, resource, request.code().trim(), null))
+                        .then(codeExists(tenantId, resource, request, null))
                         .flatMap(exists -> exists
                                 ? Mono.error(new HrmsException(HttpStatus.CONFLICT, "CODE_EXISTS", "Code already exists"))
                                 : repository.create(tenantId, resource, normalize(request), ACTOR))
@@ -64,7 +65,7 @@ public class WorkflowAccessApplicationService implements com.company.hrms.workfl
                         .switchIfEmpty(notFound(resource))
                         .then(validate(tenantId, resource, request))
                         .then(requireCode(resource, request.code()))
-                        .then(repository.codeExists(tenantId, resource, request.code().trim(), id))
+                        .then(codeExists(tenantId, resource, request, id))
                         .flatMap(exists -> exists
                                 ? Mono.error(new HrmsException(HttpStatus.CONFLICT, "CODE_EXISTS", "Code already exists"))
                                 : repository.update(tenantId, resource, id, normalize(request), ACTOR))
@@ -80,9 +81,24 @@ public class WorkflowAccessApplicationService implements com.company.hrms.workfl
     }
 
     @Override
-    public Flux<WorkflowAccessModels.MasterViewDto> list(WorkflowAccessModels.Resource resource, WorkflowAccessModels.SearchQuery query) {
+    public Mono<PagedResult<WorkflowAccessModels.MasterViewDto>> list(
+            WorkflowAccessModels.Resource resource,
+            WorkflowAccessModels.SearchQuery query
+    ) {
         WorkflowAccessModels.SearchQuery normalized = normalizeQuery(query);
-        return withTenant(resource).flatMapMany(tenantId -> repository.list(tenantId, resource, normalized));
+        return withTenant(resource).flatMap(tenantId -> repository.list(tenantId, resource, normalized)
+                .collectList()
+                .zipWith(repository.count(tenantId, resource, normalized))
+                .map(tuple -> {
+                    int page = normalized.limit() == 0 ? 0 : normalized.offset() / normalized.limit();
+                    int totalPages = tuple.getT2() == 0 ? 0 : (int) Math.ceil((double) tuple.getT2() / normalized.limit());
+                    return new PagedResult<>(
+                            tuple.getT1(),
+                            page,
+                            normalized.limit(),
+                            tuple.getT2(),
+                            totalPages);
+                }));
     }
 
     @Override
@@ -256,6 +272,18 @@ public class WorkflowAccessApplicationService implements com.company.hrms.workfl
             return Mono.error(new HrmsException(HttpStatus.BAD_REQUEST, "CODE_REQUIRED", "Code is required"));
         }
         return Mono.empty();
+    }
+
+    private Mono<Boolean> codeExists(
+            String tenantId,
+            WorkflowAccessModels.Resource resource,
+            WorkflowAccessModels.MasterUpsertRequest request,
+            UUID excludeId
+    ) {
+        if (resource == WorkflowAccessModels.Resource.ROLE_PERMISSION_MAPPINGS) {
+            return Mono.just(false);
+        }
+        return repository.codeExists(tenantId, resource, request.code().trim(), excludeId);
     }
 
     private Mono<Void> requireExists(String tenantId, String tableName, UUID id, boolean tenantOwned, String errorCode) {

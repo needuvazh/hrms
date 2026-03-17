@@ -1,6 +1,7 @@
 package com.company.hrms.documentpolicy.service;
 
 import com.company.hrms.documentpolicy.model.DocumentPolicyModels;
+import com.company.hrms.masterdata.reference.api.PagedResult;
 import java.util.UUID;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -13,7 +14,7 @@ public interface DocumentPolicyModuleApi {
 
     Mono<DocumentPolicyModels.MasterViewDto> get(DocumentPolicyModels.Resource resource, UUID id);
 
-    Flux<DocumentPolicyModels.MasterViewDto> list(DocumentPolicyModels.Resource resource, DocumentPolicyModels.SearchQuery query);
+    Mono<PagedResult<DocumentPolicyModels.MasterViewDto>> list(DocumentPolicyModels.Resource resource, DocumentPolicyModels.SearchQuery query);
 
     Mono<DocumentPolicyModels.MasterViewDto> updateStatus(DocumentPolicyModels.Resource resource, UUID id, DocumentPolicyModels.StatusUpdateCommand command);
 

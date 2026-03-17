@@ -3,6 +3,7 @@ package com.company.hrms.documentpolicy.service.impl;
 import com.company.hrms.documentpolicy.model.DocumentPolicyModels;
 import com.company.hrms.documentpolicy.repository.DocumentPolicyRepository;
 import com.company.hrms.documentpolicy.service.DocumentPolicyModuleApi;
+import com.company.hrms.masterdata.reference.api.PagedResult;
 import com.company.hrms.platform.audit.api.AuditEvent;
 import com.company.hrms.platform.audit.api.AuditEventPublisher;
 import com.company.hrms.platform.featuretoggle.api.EnablementGuard;
@@ -81,9 +82,24 @@ public class DocumentPolicyApplicationService implements DocumentPolicyModuleApi
     }
 
     @Override
-    public Flux<DocumentPolicyModels.MasterViewDto> list(DocumentPolicyModels.Resource resource, DocumentPolicyModels.SearchQuery query) {
+    public Mono<PagedResult<DocumentPolicyModels.MasterViewDto>> list(
+            DocumentPolicyModels.Resource resource,
+            DocumentPolicyModels.SearchQuery query
+    ) {
         DocumentPolicyModels.SearchQuery normalized = normalizeQuery(query);
-        return withTenant().flatMapMany(tenantId -> repository.list(tenantId, resource, normalized));
+        return withTenant().flatMap(tenantId -> repository.list(tenantId, resource, normalized)
+                .collectList()
+                .zipWith(repository.count(tenantId, resource, normalized))
+                .map(tuple -> {
+                    int page = normalized.limit() == 0 ? 0 : normalized.offset() / normalized.limit();
+                    int totalPages = tuple.getT2() == 0 ? 0 : (int) Math.ceil((double) tuple.getT2() / normalized.limit());
+                    return new PagedResult<>(
+                            tuple.getT1(),
+                            page,
+                            normalized.limit(),
+                            tuple.getT2(),
+                            totalPages);
+                }));
     }
 
     @Override

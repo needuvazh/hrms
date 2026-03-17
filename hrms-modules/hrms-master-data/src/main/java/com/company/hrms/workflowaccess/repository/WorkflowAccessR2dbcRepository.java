@@ -31,8 +31,8 @@ public class WorkflowAccessR2dbcRepository implements WorkflowAccessRepository {
         UUID id = UUID.randomUUID();
         GenericExecuteSpec spec = databaseClient.sql(insertSql(resource))
                 .bind("id", id)
-                .bind("code", request.code().trim())
-                .bind("name", request.name().trim())
+                .bind("code", trimOrEmpty(request.code()))
+                .bind("name", trimOrEmpty(request.name()))
                 .bind("active", request.active() == null || request.active())
                 .bind("createdBy", actor)
                 .bind("updatedBy", actor);
@@ -53,8 +53,8 @@ public class WorkflowAccessR2dbcRepository implements WorkflowAccessRepository {
     ) {
         GenericExecuteSpec spec = databaseClient.sql(updateSql(resource))
                 .bind("id", id)
-                .bind("code", request.code().trim())
-                .bind("name", request.name().trim())
+                .bind("code", trimOrEmpty(request.code()))
+                .bind("name", trimOrEmpty(request.name()))
                 .bind("active", request.active() == null || request.active())
                 .bind("updatedBy", actor);
         if (resource.tenantOwned()) {
@@ -107,6 +107,37 @@ public class WorkflowAccessR2dbcRepository implements WorkflowAccessRepository {
         }
         spec = bindResourceFilters(spec, resource, query);
         return spec.map((row, metadata) -> mapRow(row, resource)).all();
+    }
+
+    @Override
+    public Mono<Long> count(String tenantId, WorkflowAccessModels.Resource resource, WorkflowAccessModels.SearchQuery query) {
+        StringBuilder sql = new StringBuilder("SELECT count(*) AS cnt FROM ").append(resource.table()).append(" t WHERE 1=1");
+        if (resource.tenantOwned()) {
+            sql.append(" AND t.tenant_id = :tenantId");
+        }
+        String like = "%";
+        if (StringUtils.hasText(query.q())) {
+            like = "%" + query.q().trim() + "%";
+            sql.append(" AND (lower(cast(t.").append(resource.codeColumn()).append(" as text)) LIKE lower(:q) OR lower(cast(t.")
+                    .append(resource.nameColumn()).append(" as text)) LIKE lower(:q))");
+        }
+        if (query.active() != null) {
+            sql.append(" AND t.active = :active");
+        }
+        applyResourceFilters(sql, resource, query);
+
+        GenericExecuteSpec spec = databaseClient.sql(sql.toString());
+        if (resource.tenantOwned()) {
+            spec = spec.bind("tenantId", tenantId);
+        }
+        if (StringUtils.hasText(query.q())) {
+            spec = spec.bind("q", like);
+        }
+        if (query.active() != null) {
+            spec = spec.bind("active", query.active());
+        }
+        spec = bindResourceFilters(spec, resource, query);
+        return spec.map((row, metadata) -> row.get("cnt", Long.class) == null ? 0L : row.get("cnt", Long.class)).one();
     }
 
     @Override
@@ -647,65 +678,26 @@ public class WorkflowAccessR2dbcRepository implements WorkflowAccessRepository {
                     "approvalRequiredFlag",
                     request.approvalRequiredFlag(),
                     Boolean.class).bind("description", valueOrNull(request.description()));
-            case APPROVAL_MATRICES -> bindNullable(
-                    bindNullable(
-                            bindNullable(
-                                    bindNullable(
-                                            bindNullable(
-                                                    bindNullable(
-                                                            bindNullable(
-                                                                    bindNullable(
-                                                                            bindNullable(
-                                                                                    bindNullable(
-                                                                                            bindNullable(
-                                                                                                    bindNullable(
-                                                                                                            bindNullable(
-                                                                                                                    bindNullable(spec, "workflowTypeId", request.workflowTypeId(), UUID.class),
-                                                                                                                    "matrixName",
-                                                                                                                    valueOrNull(request.matrixName()),
-                                                                                                                    String.class),
-                                                                                                            "legalEntityId",
-                                                                                                            request.legalEntityId(),
-                                                                                                            UUID.class),
-                                                                                                    "branchId",
-                                                                                                    request.branchId(),
-                                                                                                    UUID.class),
-                                                                                            "departmentId",
-                                                                                            request.departmentId(),
-                                                                                            UUID.class),
-                                                                                    "employeeCategoryId",
-                                                                                    request.employeeCategoryId(),
-                                                                                    UUID.class),
-                                                                            "workerTypeId",
-                                                                            request.workerTypeId(),
-                                                                            UUID.class),
-                                                                    "serviceRequestTypeId",
-                                                                    request.serviceRequestTypeId(),
-                                                                    UUID.class),
-                                                            "minAmount",
-                                                            request.minAmount(),
-                                                            BigDecimal.class),
-                                                    "maxAmount",
-                                                    request.maxAmount(),
-                                                    BigDecimal.class),
-                                            "levelNo",
-                                            request.levelNo(),
-                                            Integer.class),
-                                    "approverSourceType",
-                                    valueOrNull(request.approverSourceType()),
-                                    String.class),
-                            "approverRoleId",
-                            request.approverRoleId(),
-                            UUID.class),
-                    "approverUserRef",
-                    valueOrNull(request.approverUserRef()),
-                    String.class)
-                    .bindNull("approvalActionTypeId", UUID.class)
-                    .bind("approvalActionTypeId", request.approvalActionTypeId())
-                    .bindNull("escalationDays", Integer.class)
-                    .bind("escalationDays", request.escalationDays())
-                    .bind("delegationAllowedFlag", request.delegationAllowedFlag() != null && request.delegationAllowedFlag())
-                    .bind("description", valueOrNull(request.description()));
+            case APPROVAL_MATRICES -> {
+                GenericExecuteSpec matrixSpec = bindNullable(spec, "workflowTypeId", request.workflowTypeId(), UUID.class);
+                matrixSpec = bindNullable(matrixSpec, "matrixName", valueOrNull(request.matrixName()), String.class);
+                matrixSpec = bindNullable(matrixSpec, "legalEntityId", request.legalEntityId(), UUID.class);
+                matrixSpec = bindNullable(matrixSpec, "branchId", request.branchId(), UUID.class);
+                matrixSpec = bindNullable(matrixSpec, "departmentId", request.departmentId(), UUID.class);
+                matrixSpec = bindNullable(matrixSpec, "employeeCategoryId", request.employeeCategoryId(), UUID.class);
+                matrixSpec = bindNullable(matrixSpec, "workerTypeId", request.workerTypeId(), UUID.class);
+                matrixSpec = bindNullable(matrixSpec, "serviceRequestTypeId", request.serviceRequestTypeId(), UUID.class);
+                matrixSpec = bindNullable(matrixSpec, "minAmount", request.minAmount(), BigDecimal.class);
+                matrixSpec = bindNullable(matrixSpec, "maxAmount", request.maxAmount(), BigDecimal.class);
+                matrixSpec = bindNullable(matrixSpec, "levelNo", request.levelNo(), Integer.class);
+                matrixSpec = bindNullable(matrixSpec, "approverSourceType", valueOrNull(request.approverSourceType()), String.class);
+                matrixSpec = bindNullable(matrixSpec, "approverRoleId", request.approverRoleId(), UUID.class);
+                matrixSpec = bindNullable(matrixSpec, "approverUserRef", valueOrNull(request.approverUserRef()), String.class);
+                matrixSpec = bindNullable(matrixSpec, "approvalActionTypeId", request.approvalActionTypeId(), UUID.class);
+                matrixSpec = bindNullable(matrixSpec, "escalationDays", request.escalationDays(), Integer.class);
+                matrixSpec = bindNullable(matrixSpec, "delegationAllowedFlag", request.delegationAllowedFlag(), Boolean.class);
+                yield matrixSpec.bind("description", valueOrNull(request.description()));
+            }
             case NOTIFICATION_TEMPLATES -> bindNullable(
                     bindNullable(
                             bindNullable(
@@ -844,6 +836,10 @@ public class WorkflowAccessR2dbcRepository implements WorkflowAccessRepository {
 
     private String valueOrNull(String value) {
         return StringUtils.hasText(value) ? value.trim() : null;
+    }
+
+    private String trimOrEmpty(String value) {
+        return StringUtils.hasText(value) ? value.trim() : "";
     }
 
     private <T> GenericExecuteSpec bindNullable(GenericExecuteSpec spec, String name, T value, Class<T> type) {

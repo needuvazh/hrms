@@ -103,6 +103,32 @@ Approval Action Type fields:
 
 - `finalActionFlag`
 
+`GET /api/workflow-access/{resource}` response is paged and returns:
+
+```json
+{
+  "items": [
+    {
+      "id": "uuid",
+      "tenantId": "default",
+      "code": "HR_ADMIN",
+      "name": "HR Admin",
+      "active": true,
+      "createdAt": "2026-01-01T00:00:00Z",
+      "updatedAt": "2026-01-01T00:00:00Z",
+      "createdBy": "system",
+      "updatedBy": "system"
+    }
+  ],
+  "page": 0,
+  "size": 20,
+  "totalElements": 1,
+  "totalPages": 1
+}
+```
+
+Each item in `items` is `MasterViewDto`.
+
 ## Response model (`MasterViewDto`)
 
 Response includes a superset payload:
