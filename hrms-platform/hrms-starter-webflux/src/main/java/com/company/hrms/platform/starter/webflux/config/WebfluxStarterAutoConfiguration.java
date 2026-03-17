@@ -1,9 +1,12 @@
 package com.company.hrms.platform.starter.webflux.config;
 
 import org.springdoc.core.models.GroupedOpenApi;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import java.time.Clock;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -17,6 +20,8 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 @EnableConfigurationProperties(WebfluxCorsProperties.class)
 public class WebfluxStarterAutoConfiguration {
 
+    private static final String BEARER_AUTH_SCHEME = "bearerAuth";
+
     @Bean
     Clock hrmsSystemClock() {
         return Clock.systemUTC();
@@ -25,6 +30,14 @@ public class WebfluxStarterAutoConfiguration {
     @Bean
     OpenAPI hrmsOpenApi() {
         return new OpenAPI()
+                .components(new Components()
+                        .addSecuritySchemes(
+                                BEARER_AUTH_SCHEME,
+                                new SecurityScheme()
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")))
+                .addSecurityItem(new SecurityRequirement().addList(BEARER_AUTH_SCHEME))
                 .info(new Info()
                         .title("HRMS API")
                         .description("Reactive, multi-tenant HRMS APIs for monolith and component deployments.")
