@@ -1,5 +1,6 @@
 package com.company.hrms.platform.starter.webflux.config;
 
+import com.company.hrms.platform.sharedkernel.web.HrmsHeaders;
 import org.springdoc.core.models.GroupedOpenApi;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -21,6 +22,9 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 public class WebfluxStarterAutoConfiguration {
 
     private static final String BEARER_AUTH_SCHEME = "bearerAuth";
+    private static final String TENANT_ID_AUTH_SCHEME = "tenantIdHeader";
+    private static final String TENANT_KEY_AUTH_SCHEME = "tenantKeyHeader";
+    private static final String TENANT_KEY_HEADER = "X-Tenant-Key";
 
     @Bean
     Clock hrmsSystemClock() {
@@ -36,8 +40,22 @@ public class WebfluxStarterAutoConfiguration {
                                 new SecurityScheme()
                                         .type(SecurityScheme.Type.HTTP)
                                         .scheme("bearer")
-                                        .bearerFormat("JWT")))
+                                        .bearerFormat("JWT"))
+                        .addSecuritySchemes(
+                                TENANT_ID_AUTH_SCHEME,
+                                new SecurityScheme()
+                                        .type(SecurityScheme.Type.APIKEY)
+                                        .in(SecurityScheme.In.HEADER)
+                                        .name(HrmsHeaders.TENANT_ID))
+                        .addSecuritySchemes(
+                                TENANT_KEY_AUTH_SCHEME,
+                                new SecurityScheme()
+                                        .type(SecurityScheme.Type.APIKEY)
+                                        .in(SecurityScheme.In.HEADER)
+                                        .name(TENANT_KEY_HEADER)))
                 .addSecurityItem(new SecurityRequirement().addList(BEARER_AUTH_SCHEME))
+                .addSecurityItem(new SecurityRequirement().addList(TENANT_ID_AUTH_SCHEME))
+                .addSecurityItem(new SecurityRequirement().addList(TENANT_KEY_AUTH_SCHEME))
                 .info(new Info()
                         .title("HRMS API")
                         .description("Reactive, multi-tenant HRMS APIs for monolith and component deployments.")
