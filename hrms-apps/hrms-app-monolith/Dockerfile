@@ -2,7 +2,7 @@ FROM eclipse-temurin:21-jdk-alpine AS builder
 
 WORKDIR /build
 
-RUN apk add --no-cache curl unzip
+RUN apk add --no-cache curl unzip sed
 
 RUN curl -sL https://services.gradle.org/distributions/gradle-8.10.2-bin.zip -o /tmp/gradle.zip && \
     mkdir -p /root/.gradle/wrapper/dists/gradle-8.10.2-bin/zip2 && \
@@ -18,7 +18,7 @@ COPY hrms-platform ./hrms-platform
 COPY hrms-modules ./hrms-modules
 COPY hrms-apps ./hrms-apps
 
-RUN chmod +x gradlew
+RUN chmod +x gradlew && sed -i 's/\r$//' gradlew
 RUN ./gradlew :hrms-apps:hrms-app-monolith:bootJar --no-daemon --quiet
 
 FROM eclipse-temurin:21-jre-alpine
@@ -27,7 +27,7 @@ WORKDIR /app
 
 RUN addgroup -S hrms && adduser -S hrms -G hrms
 
-COPY --from=builder /build/hrms-apps/hrms-app-monolith/build/libs/hrms-app-monolith.jar app.jar
+COPY --from=builder /build/hrms-apps/hrms-app-monolith/build/libs/hrms-app-monolith-*.jar app.jar
 
 RUN chown -R hrms:hrms /app
 

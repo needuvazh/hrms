@@ -1,0 +1,329 @@
+{
+  "headers": {
+    "X-Tenant-Id": "default",
+    "Authorization": "Bearer <token-if-enabled>"
+  },
+  "flowOrder": [
+    "POST /api/v1/employee-information/employees",
+    "GET /api/v1/employee-information/employees/{employeeId}",
+    "PATCH /api/v1/employee-information/employees/{employeeId}/status",
+    "POST /api/v1/employee-information/employees/{employeeId}/addresses",
+    "POST /api/v1/employee-information/employees/{employeeId}/emergency-contacts",
+    "POST /api/v1/employee-information/employees/{employeeId}/dependants",
+    "POST /api/v1/employee-information/employees/{employeeId}/beneficiaries",
+    "PUT /api/v1/employee-information/employees/{employeeId}/workforce-detail",
+    "POST /api/v1/employee-information/employees/{employeeId}/documents/upload",
+    "POST /api/v1/employee-information/employees/{employeeId}/employment-history",
+    "POST /api/v1/employee-information/employees/{employeeId}/onboarding"
+  ],
+  "createEmployee": {
+    "request": {
+      "employeeCode": "EMP00011",
+      "firstName": "Ahmed",
+      "middleName": "Salim",
+      "lastName": "Al Balushi",
+      "fullName": "Ahmed Salim Al Balushi",
+      "arabicName": "أحمد سالم البلوشي",
+      "profilePhotoPath": "employee/default/photos/emp00011.jpg",
+      "dateOfBirth": "1992-05-15",
+      "bloodGroup": "O+",
+      "personalEmail": "ahmed.personal@example.com",
+      "officialEmail": "ahmed.albalushi@company.com",
+      "primaryMobileNumber": "+96899112233",
+      "secondaryMobileNumber": "+96899887766",
+      "alternateContactNumber": "+96890001122",
+      "employeeStatus": "ACTIVE",
+      "dateOfJoining": "2026-03-01",
+      "confirmationDate": "2026-09-01",
+      "probationEndDate": "2026-08-31",
+      "retirementDate": "2052-05-14",
+      "workforceCategory": "OMANI_NATIONAL",
+      "jobTitle": "HR Executive",
+      "actor": "hr.admin"
+    },
+    "response": {
+      "employeeId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "tenantId": "default",
+      "employeeCode": "EMP00011",
+      "firstName": "Ahmed",
+      "middleName": "Salim",
+      "lastName": "Al Balushi",
+      "fullName": "Ahmed Salim Al Balushi",
+      "officialEmail": "ahmed.albalushi@company.com",
+      "employeeStatus": "ACTIVE",
+      "workforceCategory": "OMANI_NATIONAL",
+      "createdAt": "2026-03-18T10:00:00Z",
+      "updatedAt": "2026-03-18T10:00:00Z",
+      "active": true
+    }
+  },
+  "updateEmployeeStatus": {
+    "request": {
+      "employeeStatus": "INACTIVE",
+      "actor": "hr.admin"
+    },
+    "response": {
+      "employeeId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "employeeStatus": "INACTIVE",
+      "updatedAt": "2026-03-18T10:20:00Z"
+    }
+  },
+  "addressApis": {
+    "createAddress": {
+      "endpoint": "POST /api/v1/employee-information/employees/{employeeId}/addresses",
+      "request": {
+        "addressType": "CURRENT",
+        "flatVillaNumber": "Villa 10",
+        "buildingName": "Al Sawari Block",
+        "street": "Street 5",
+        "area": "Qurum",
+        "city": "Muscat",
+        "stateProvince": "Muscat",
+        "countryId": "11111111-1111-1111-1111-111111111111",
+        "postalCode": "100",
+        "poBox": "1234",
+        "landmark": "Near City Center",
+        "primary": true,
+        "active": true,
+        "actor": "hr.admin"
+      },
+      "response": {
+        "addressId": "43000000-0000-0000-0000-000000000001",
+        "employeeId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "addressType": "CURRENT",
+        "city": "Muscat",
+        "primary": true,
+        "active": true
+      }
+    },
+    "listAddresses": {
+      "endpoint": "GET /api/v1/employee-information/employees/{employeeId}/addresses",
+      "response": [
+        {
+          "addressId": "43000000-0000-0000-0000-000000000001",
+          "addressType": "CURRENT",
+          "city": "Muscat",
+          "primary": true,
+          "active": true
+        }
+      ]
+    }
+  },
+  "emergencyContactApis": {
+    "createEmergencyContact": {
+      "endpoint": "POST /api/v1/employee-information/employees/{employeeId}/emergency-contacts",
+      "request": {
+        "name": "Ali Admin",
+        "relationshipTypeId": "22222222-2222-2222-2222-222222222222",
+        "primaryMobileNumber": "+96890000004",
+        "secondaryMobileNumber": "+96890000006",
+        "email": "ali.admin@example.com",
+        "addressLine1": "Line 1",
+        "addressLine2": "Line 2",
+        "city": "Muscat",
+        "countryId": "11111111-1111-1111-1111-111111111111",
+        "primary": true,
+        "remarks": "Primary emergency contact",
+        "active": true,
+        "actor": "hr.admin"
+      },
+      "response": {
+        "emergencyContactId": "43000000-0000-0000-0000-000000000002",
+        "employeeId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "name": "Ali Admin",
+        "primary": true,
+        "active": true
+      }
+    }
+  },
+  "dependantApis": {
+    "createDependant": {
+      "endpoint": "POST /api/v1/employee-information/employees/{employeeId}/dependants",
+      "request": {
+        "fullName": "Sara Admin",
+        "relationshipTypeId": "22222222-2222-2222-2222-222222222222",
+        "genderId": "33333333-3333-3333-3333-333333333333",
+        "dateOfBirth": "2015-06-15",
+        "nationalityId": "44444444-4444-4444-4444-444444444444",
+        "passportNumber": "P1234567",
+        "civilIdNumber": "C1234567",
+        "insuranceEligible": true,
+        "minor": true,
+        "effectiveFrom": "2025-01-01",
+        "effectiveTo": "2030-12-31",
+        "status": "ACTIVE",
+        "remarks": "Seed dependant",
+        "active": true,
+        "actor": "hr.admin"
+      },
+      "response": {
+        "dependantId": "43000000-0000-0000-0000-000000000003",
+        "employeeId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "fullName": "Sara Admin",
+        "active": true
+      }
+    }
+  },
+  "beneficiaryApis": {
+    "createBeneficiary": {
+      "endpoint": "POST /api/v1/employee-information/employees/{employeeId}/beneficiaries",
+      "request": {
+        "fullName": "Fatima Admin",
+        "relationshipTypeId": "22222222-2222-2222-2222-222222222222",
+        "dateOfBirth": "1988-03-10",
+        "contactNumber": "+96890000005",
+        "email": "fatima.admin@example.com",
+        "address": "Muscat, Oman",
+        "identificationNumber": "ID-BEN-001",
+        "allocationPercentage": 100.0,
+        "priorityOrder": 1,
+        "active": true,
+        "remarks": "Seed beneficiary",
+        "actor": "hr.admin"
+      },
+      "response": {
+        "beneficiaryId": "43000000-0000-0000-0000-000000000004",
+        "employeeId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "fullName": "Fatima Admin",
+        "allocationPercentage": 100.0,
+        "active": true
+      }
+    }
+  },
+  "workforceApis": {
+    "saveWorkforceDetail": {
+      "endpoint": "PUT /api/v1/employee-information/employees/{employeeId}/workforce-detail",
+      "request": {
+        "workforceCategory": "OMANI_NATIONAL",
+        "pasiNumber": "PASI-0001",
+        "pasiRegistrationDate": "2024-01-15",
+        "permitNumber": null,
+        "permitType": null,
+        "sponsorName": null,
+        "sponsorId": null,
+        "visaStatus": null,
+        "workPermitIssueDate": null,
+        "workPermitExpiryDate": null,
+        "remarks": "Seed workforce detail",
+        "actor": "hr.admin"
+      },
+      "response": {
+        "workforceDetailId": "43000000-0000-0000-0000-000000000005",
+        "employeeId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "workforceCategory": "OMANI_NATIONAL",
+        "pasiNumber": "PASI-0001"
+      }
+    }
+  },
+  "documentApis": {
+    "addDocumentMetadata": {
+      "endpoint": "POST /api/v1/employee-information/employees/{employeeId}/documents",
+      "request": {
+        "documentType": "PASSPORT",
+        "documentName": "Passport Copy",
+        "documentNumber": "PASS-0001",
+        "issuingCountryId": "11111111-1111-1111-1111-111111111111",
+        "issuingAuthority": "Royal Oman Police",
+        "issueDate": "2020-01-01",
+        "expiryDate": "2030-01-01",
+        "fileName": "passport.pdf",
+        "filePath": "employee/default/emp00011/passport.pdf",
+        "fileType": "application/pdf",
+        "fileSize": 204800,
+        "verificationStatus": "PENDING",
+        "remarks": "Passport metadata",
+        "alertEnabled": true,
+        "active": true,
+        "actor": "hr.admin"
+      },
+      "response": {
+        "employeeDocumentId": "43000000-0000-0000-0000-000000000006",
+        "employeeId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "documentType": "PASSPORT",
+        "verificationStatus": "PENDING",
+        "active": true
+      }
+    },
+    "uploadDocumentMultipart": {
+      "endpoint": "POST /api/v1/employee-information/employees/{employeeId}/documents/upload",
+      "contentType": "multipart/form-data",
+      "parts": {
+        "file": "<passport.pdf>",
+        "documentType": "PASSPORT",
+        "documentName": "Passport Copy",
+        "documentNumber": "PASS-0001",
+        "issuingCountryId": "11111111-1111-1111-1111-111111111111",
+        "issuingAuthority": "Royal Oman Police",
+        "issueDate": "2020-01-01",
+        "expiryDate": "2030-01-01",
+        "alertEnabled": true,
+        "remarks": "Uploaded from onboarding form",
+        "actor": "hr.admin"
+      }
+    }
+  },
+  "employmentHistoryApis": {
+    "addHistory": {
+      "endpoint": "POST /api/v1/employee-information/employees/{employeeId}/employment-history",
+      "request": {
+        "actionType": "JOINING",
+        "oldDepartmentId": null,
+        "newDepartmentId": null,
+        "oldDesignationId": null,
+        "newDesignationId": null,
+        "oldLocationId": null,
+        "newLocationId": null,
+        "oldGradeId": null,
+        "newGradeId": null,
+        "oldManagerId": null,
+        "newManagerId": null,
+        "effectiveDate": "2024-01-01",
+        "remarks": "Initial joining record",
+        "supportingDocumentPath": null,
+        "active": true,
+        "actor": "hr.admin"
+      },
+      "response": {
+        "employmentHistoryId": "43000000-0000-0000-0000-000000000007",
+        "employeeId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "actionType": "JOINING",
+        "effectiveDate": "2024-01-01"
+      }
+    }
+  },
+  "onboardingApis": {
+    "createOnboarding": {
+      "endpoint": "POST /api/v1/employee-information/employees/{employeeId}/onboarding",
+      "request": {
+        "eFormCompleted": true,
+        "documentUploadCompleted": true,
+        "policyAcknowledged": true,
+        "remarks": "Onboarding started",
+        "actor": "hr.admin"
+      },
+      "response": {
+        "onboardingId": "43000000-0000-0000-0000-000000000008",
+        "employeeId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "onboardingStatus": "DRAFT"
+      }
+    },
+    "acknowledgePolicy": {
+      "endpoint": "POST /api/v1/employee-information/employees/{employeeId}/onboarding/policy-ack",
+      "request": {
+        "policyCode": "HR-HANDBOOK",
+        "policyVersion": "v1.0",
+        "acceptedFlag": true,
+        "acceptedBy": "system.admin@default.hrms",
+        "remarks": "Accepted in onboarding",
+        "actor": "hr.admin"
+      },
+      "response": {
+        "acknowledgementId": "43000000-0000-0000-0000-000000000009",
+        "policyCode": "HR-HANDBOOK",
+        "policyVersion": "v1.0",
+        "acceptedFlag": true
+      }
+    }
+  },
+  "note": "Some child APIs may still return PENDING_IMPLEMENTATION until service implementation is completed."
+}
