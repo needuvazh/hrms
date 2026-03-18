@@ -28,6 +28,8 @@ public interface EmployeeInformationRepository {
 
     Mono<Boolean> existsCountry(UUID countryId);
 
+    Mono<UUID> findCountryIdByCode(String countryCode);
+
     Mono<Boolean> existsNationality(UUID nationalityId);
 
     Mono<Boolean> existsGender(UUID genderId);

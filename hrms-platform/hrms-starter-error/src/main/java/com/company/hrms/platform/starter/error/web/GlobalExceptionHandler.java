@@ -5,10 +5,12 @@ import com.company.hrms.platform.starter.error.api.ApiErrorResponse;
 import com.company.hrms.platform.starter.error.exception.HrmsException;
 import java.time.Instant;
 import java.util.List;
+import org.springframework.validation.FieldError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.reactive.resource.NoResourceFoundException;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -23,6 +25,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiErrorResponse> handleIllegalArgument(IllegalArgumentException ex, ServerWebExchange exchange) {
         return buildResponse(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", ex.getMessage(), exchange, List.of());
+    }
+
+    @ExceptionHandler(WebExchangeBindException.class)
+    public ResponseEntity<ApiErrorResponse> handleBindException(WebExchangeBindException ex, ServerWebExchange exchange) {
+        List<String> details = ex.getBindingResult()
+                .getAllErrors()
+                .stream()
+                .map(error -> {
+                    if (error instanceof FieldError fieldError) {
+                        return fieldError.getField() + ": " + (fieldError.getDefaultMessage() == null ? "invalid" : fieldError.getDefaultMessage());
+                    }
+                    return error.getObjectName() + ": " + (error.getDefaultMessage() == null ? "invalid" : error.getDefaultMessage());
+                })
+                .toList();
+        return buildResponse(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Request validation failed", exchange, details);
     }
 
     @ExceptionHandler(NoResourceFoundException.class)

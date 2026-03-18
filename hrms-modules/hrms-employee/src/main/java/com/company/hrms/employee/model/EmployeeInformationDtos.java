@@ -17,9 +17,14 @@ public final class EmployeeInformationDtos {
     }
 
     public enum EmployeeStatus {
+        DRAFT,
         ACTIVE,
+        ON_PROBATION,
+        CONFIRMED,
+        NOTICE_PERIOD,
+        RESIGNED,
+        RETIRED,
         INACTIVE,
-        PROBATION,
         SUSPENDED,
         TERMINATED
     }
@@ -178,7 +183,9 @@ public final class EmployeeInformationDtos {
             String area,
             String city,
             String stateProvince,
+            String stateCode,
             UUID countryId,
+            String countryCode,
             String postalCode,
             String poBox,
             String landmark,

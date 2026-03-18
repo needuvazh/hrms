@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
@@ -113,6 +114,16 @@ public class EmployeeInformationController {
             @Valid @RequestBody EmployeeAddressUpsertRequest request
     ) {
         return employeeInformationApi.addAddress(employeeId, request);
+    }
+
+    @PostMapping("/employees/{employeeId}/addresses/bulk")
+    @Operation(summary = "Add employee addresses in bulk")
+    public Flux<EmployeeAddressView> addAddressesBulk(
+            @PathVariable("employeeId") UUID employeeId,
+            @Valid @RequestBody List<EmployeeAddressUpsertRequest> requests
+    ) {
+        return Flux.fromIterable(requests)
+                .concatMap(request -> employeeInformationApi.addAddress(employeeId, request));
     }
 
     @PutMapping("/employees/{employeeId}/addresses/{addressId}")
@@ -528,7 +539,7 @@ public class EmployeeInformationController {
     }
 
     public record EmployeeStatusUpdateRequest(
-            @NotNull EmployeeStatus employeeStatus,
+            EmployeeStatus employeeStatus,
             String actor
     ) {
     }
@@ -551,7 +562,7 @@ public class EmployeeInformationController {
             String primaryMobileNumber,
             String secondaryMobileNumber,
             String alternateContactNumber,
-            @NotNull EmployeeStatus employeeStatus,
+            EmployeeStatus employeeStatus,
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateOfJoining,
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate confirmationDate,
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate probationEndDate,
