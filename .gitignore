@@ -13,3 +13,12 @@
 
 # Java
 out/
+
+# Eclipse/STS
+**/.project
+**/.classpath
+**/.factorypath
+**/.settings/
+
+# Local Gradle user home (project-local)
+.gradle-user/
