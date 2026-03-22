@@ -27,7 +27,7 @@ WORKDIR /app
 
 RUN addgroup -S hrms && adduser -S hrms -G hrms
 
-COPY --from=builder /build/hrms-apps/hrms-app-monolith/build/libs/hrms-app-monolith-*.jar app.jar
+COPY --from=builder /build/hrms-apps/hrms-app-monolith/build/libs/hrms-app-monolith-*.jar /app/app.jar
 
 RUN chown -R hrms:hrms /app
 
@@ -38,4 +38,4 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD sh -c 'wget --no-verbose --tries=1 --spider "http://localhost:${PORT:-8080}/actuator/health" || exit 1'
 
-ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT:-8080} -jar app.jar"]
+ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT:-8080} -jar /app/app.jar"]
