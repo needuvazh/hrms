@@ -20,6 +20,8 @@ COPY hrms-apps ./hrms-apps
 
 RUN chmod +x gradlew && sed -i 's/\r$//' gradlew
 RUN ./gradlew :hrms-apps:hrms-app-monolith:bootJar --no-daemon --quiet
+RUN JAR_PATH=$(ls /build/hrms-apps/hrms-app-monolith/build/libs/hrms-app-monolith-*.jar | grep -v -- '-plain\.jar' | head -n 1) && \
+    cp "$JAR_PATH" /build/hrms-apps/hrms-app-monolith/build/libs/app.jar
 
 FROM eclipse-temurin:21-jre-alpine
 
@@ -27,7 +29,7 @@ WORKDIR /app
 
 RUN addgroup -S hrms && adduser -S hrms -G hrms
 
-COPY --from=builder /build/hrms-apps/hrms-app-monolith/build/libs/hrms-app-monolith-*.jar /app/app.jar
+COPY --from=builder /build/hrms-apps/hrms-app-monolith/build/libs/app.jar /app/app.jar
 
 RUN chown -R hrms:hrms /app
 
