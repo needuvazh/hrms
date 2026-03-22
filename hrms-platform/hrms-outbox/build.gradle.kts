@@ -13,4 +13,5 @@ dependencies {
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.postgresql:r2dbc-postgresql")
 }

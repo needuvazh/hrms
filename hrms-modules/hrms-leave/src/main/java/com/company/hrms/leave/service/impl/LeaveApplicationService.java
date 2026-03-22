@@ -26,6 +26,7 @@ import com.company.hrms.contracts.workflow.AdvanceWorkflowCommandDto;
 import com.company.hrms.contracts.workflow.StartWorkflowCommandDto;
 import com.company.hrms.contracts.workflow.WorkflowAction;
 import com.company.hrms.workflow.service.WorkflowModuleApi;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -329,23 +330,57 @@ public class LeaveApplicationService implements LeaveModuleApi {
                 leaveType.tenantId(),
                 leaveType.leaveCode(),
                 leaveType.name(),
-                leaveType.paid(),
+                null,
                 leaveType.annualLimitDays(),
+                false,
+                0,
+                false,
+                leaveType.paid(),
+                false,
+                null,
+                1,
+                false,
+                1,
+                leaveType.annualLimitDays(),
+                false,
+                false,
+                false,
+                null,
                 leaveType.active(),
+                0,
                 leaveType.createdAt(),
                 leaveType.updatedAt());
     }
 
     private LeaveBalanceViewDto toLeaveBalanceView(LeaveBalanceDto leaveBalance) {
+        BigDecimal totalDays = BigDecimal.valueOf(leaveBalance.totalDays());
+        BigDecimal usedDays = BigDecimal.valueOf(leaveBalance.usedDays());
+        BigDecimal remainingDays = BigDecimal.valueOf(leaveBalance.remainingDays());
         return new LeaveBalanceViewDto(
                 leaveBalance.id(),
                 leaveBalance.tenantId(),
                 leaveBalance.employeeId(),
+                null,
+                null,
                 leaveBalance.leaveTypeId(),
+                null,
+                null,
                 leaveBalance.leaveYear(),
-                leaveBalance.totalDays(),
-                leaveBalance.usedDays(),
-                leaveBalance.remainingDays(),
+                LocalDate.of(leaveBalance.leaveYear(), 1, 1),
+                LocalDate.of(leaveBalance.leaveYear(), 12, 31),
+                totalDays,
+                totalDays,
+                BigDecimal.ZERO,
+                totalDays,
+                usedDays,
+                usedDays,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                remainingDays,
+                remainingDays,
+                true,
                 leaveBalance.createdAt(),
                 leaveBalance.updatedAt());
     }

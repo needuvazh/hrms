@@ -173,6 +173,29 @@ class MonolithSecurityAuthorizationTest {
                 .expectStatus().isOk();
     }
 
+    @Test
+    void superAdminRoleBypassesPermissionChecks() {
+        String superAdminToken = jwtToken(Set.of("SUPER_ADMIN"), Set.of());
+
+        webTestClient.post()
+                .uri("/api/v1/employees")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + superAdminToken)
+                .header("X-Tenant-Id", "default")
+                .bodyValue("""
+                        {
+                          "employeeCode":"EMP-1002",
+                          "firstName":"Bob",
+                          "lastName":"Admin",
+                          "email":"bob@hrms.local",
+                          "departmentCode":"ENG",
+                          "jobTitle":"Architect"
+                        }
+                        """)
+                .exchange()
+                .expectStatus().isOk();
+    }
+
     private String jwtToken(Set<String> roles, Set<String> permissions) {
         String[] value = new String[1];
         StepVerifier.create(jwtTokenService.issueToken(new JwtTokenClaims(

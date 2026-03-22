@@ -7,7 +7,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public enum ReferenceResource {
-    COUNTRIES("countries", "master_data.countries", "country_code", "country_name", Set.of("country_code", "country_name", "iso2_code", "iso3_code"), Set.of("country_code", "country_name", "iso2_code", "iso3_code", "created_at", "updated_at")),
+    COUNTRIES("countries", "master_data.countries", "country_code", "country_name", Set.of("country_code", "country_name", "iso2_code", "iso3_code", "native_name"), Set.of("country_code", "country_name", "iso2_code", "iso3_code", "created_at", "updated_at")),
     CURRENCIES("currencies", "master_data.currencies", "currency_code", "currency_name", Set.of("currency_code", "currency_name"), Set.of("currency_code", "currency_name", "created_at", "updated_at")),
     LANGUAGES("languages", "master_data.languages", "language_code", "language_name", Set.of("language_code", "language_name", "native_name"), Set.of("language_code", "language_name", "created_at", "updated_at")),
     NATIONALITIES("nationalities", "master_data.nationalities", "nationality_code", "nationality_name", Set.of("nationality_code", "nationality_name", "country_code"), Set.of("nationality_code", "nationality_name", "created_at", "updated_at")),

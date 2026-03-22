@@ -5,9 +5,11 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 /**
@@ -16,6 +18,7 @@ import lombok.experimental.Accessors;
  */
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor(force = true, access = AccessLevel.PROTECTED)
 @Accessors(fluent = true)
 @EqualsAndHashCode
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -108,4 +111,100 @@ public class EmployeeViewDto {
     private final Instant createdAt;
     private final Instant updatedAt;
     private final Instant lastModifiedAt;
+
+    public EmployeeViewDto(
+            UUID id,
+            String tenantId,
+            String employeeCode,
+            String firstName,
+            String lastName,
+            String email,
+            String departmentCode,
+            String jobTitle,
+            Instant createdAt,
+            Instant updatedAt
+    ) {
+        this(id, tenantId, employeeCode, null, firstName, lastName, email, departmentCode, jobTitle, createdAt, updatedAt);
+    }
+
+    public EmployeeViewDto(
+            UUID id,
+            String tenantId,
+            String employeeCode,
+            UUID personId,
+            String firstName,
+            String lastName,
+            String email,
+            String departmentCode,
+            String jobTitle,
+            Instant createdAt,
+            Instant updatedAt
+    ) {
+        this.id = id;
+        this.tenantId = tenantId;
+        this.employeeCode = employeeCode;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phoneNumber = null;
+        this.alternatePhoneNumber = null;
+        this.dateOfBirth = null;
+        this.gender = null;
+        this.nationality = null;
+        this.maritalStatus = null;
+        this.religion = null;
+        this.permanentAddressLine1 = null;
+        this.permanentAddressLine2 = null;
+        this.permanentCity = null;
+        this.permanentState = null;
+        this.permanentPostalCode = null;
+        this.permanentCountry = null;
+        this.currentAddressLine1 = null;
+        this.currentAddressLine2 = null;
+        this.currentCity = null;
+        this.currentState = null;
+        this.currentPostalCode = null;
+        this.currentCountry = null;
+        this.companyId = null;
+        this.companyName = null;
+        this.branchId = null;
+        this.branchName = null;
+        this.departmentId = null;
+        this.departmentName = departmentCode;
+        this.jobPositionId = null;
+        this.jobPositionName = jobTitle;
+        this.reportingManagerId = personId;
+        this.reportingManagerName = null;
+        this.employmentType = null;
+        this.dateOfJoining = null;
+        this.dateOfConfirmation = null;
+        this.employmentStatus = null;
+        this.salaryGradeId = null;
+        this.salaryGradeName = null;
+        this.basicSalary = null;
+        this.currency = null;
+        this.paymentFrequency = null;
+        this.omanisationStatus = null;
+        this.passportNumber = null;
+        this.passportExpiryDate = null;
+        this.labourCardNumber = null;
+        this.labourCardExpiryDate = null;
+        this.visaNumber = null;
+        this.visaExpiryDate = null;
+        this.visaType = null;
+        this.pasiNumber = null;
+        this.pasiRegistrationDate = null;
+        this.pasiStatus = null;
+        this.bankName = null;
+        this.bankAccountNumber = null;
+        this.bankIBANNumber = null;
+        this.bankBranchCode = null;
+        this.emergencyContactName = null;
+        this.emergencyContactRelationship = null;
+        this.emergencyContactPhoneNumber = null;
+        this.isActive = true;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+        this.lastModifiedAt = updatedAt;
+    }
 }

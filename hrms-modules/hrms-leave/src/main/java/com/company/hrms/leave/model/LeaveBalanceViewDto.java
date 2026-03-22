@@ -60,4 +60,53 @@ public class LeaveBalanceViewDto {
     private final Boolean isActive;
     private final Instant createdAt;
     private final Instant updatedAt;
+
+    public LeaveBalanceViewDto(
+            UUID id,
+            String tenantId,
+            UUID employeeId,
+            UUID leaveTypeId,
+            Integer financialYear,
+            Integer totalDays,
+            Integer usedDays,
+            Integer remainingDays,
+            Instant createdAt,
+            Instant updatedAt
+    ) {
+        this(
+                id,
+                tenantId,
+                employeeId,
+                null,
+                null,
+                leaveTypeId,
+                null,
+                null,
+                financialYear,
+                LocalDate.of(financialYear, 1, 1),
+                LocalDate.of(financialYear, 12, 31),
+                BigDecimal.valueOf(totalDays),
+                BigDecimal.valueOf(totalDays),
+                BigDecimal.ZERO,
+                BigDecimal.valueOf(totalDays),
+                BigDecimal.valueOf(usedDays),
+                BigDecimal.valueOf(usedDays),
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.valueOf(remainingDays),
+                BigDecimal.valueOf(remainingDays),
+                true,
+                createdAt,
+                updatedAt);
+    }
+
+    public int usedDays() {
+        return leaveTaken.intValue();
+    }
+
+    public int remainingDays() {
+        return closingBalance.intValue();
+    }
 }

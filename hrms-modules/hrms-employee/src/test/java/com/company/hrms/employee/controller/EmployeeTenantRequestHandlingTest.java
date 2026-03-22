@@ -37,7 +37,7 @@ class EmployeeTenantRequestHandlingTest {
 
     private final WebTestClient webTestClient = WebTestClient.bindToController(employeeController)
             .controllerAdvice(new GlobalExceptionHandler())
-            .webFilter(new TenantContextWebFilter())
+            .webFilter(new TenantContextWebFilter(null))
             .build();
 
     @Test
@@ -110,7 +110,7 @@ class EmployeeTenantRequestHandlingTest {
 
         WebTestClient disabledClient = WebTestClient.bindToController(new EmployeeController(disabledService))
                 .controllerAdvice(new GlobalExceptionHandler())
-                .webFilter(new TenantContextWebFilter())
+                .webFilter(new TenantContextWebFilter(null))
                 .build();
 
         disabledClient.get()
