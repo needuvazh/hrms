@@ -28,7 +28,7 @@ public class ReferenceMasterR2dbcRepository implements ReferenceMasterRepository
         UUID id = UUID.randomUUID();
         GenericExecuteSpec spec = databaseClient.sql(insertSql(resource))
                 .bind("id", id)
-                .bind("code", request.code().trim())
+                .bind("code", resolveCode(resource, request))
                 .bind("name", request.name().trim())
                 .bind("active", request.active() == null || request.active())
                 .bind("createdBy", actor)
@@ -41,7 +41,7 @@ public class ReferenceMasterR2dbcRepository implements ReferenceMasterRepository
     public Mono<ReferenceMasterRow> update(ReferenceResource resource, UUID id, ReferenceMasterUpsertRequest request, String actor) {
         GenericExecuteSpec spec = databaseClient.sql(updateSql(resource))
                 .bind("id", id)
-                .bind("code", request.code().trim())
+                .bind("code", resolveCode(resource, request))
                 .bind("name", request.name().trim())
                 .bind("active", request.active() == null || request.active())
                 .bind("updatedBy", actor);
@@ -209,6 +209,33 @@ public class ReferenceMasterR2dbcRepository implements ReferenceMasterRepository
                 .one();
     }
 
+    @Override
+    public Mono<String> resolveCurrencyCode(String currencyToken) {
+        return databaseClient.sql("""
+                SELECT currency_code
+                FROM master_data.currencies
+                WHERE active = TRUE
+                  AND (
+                    lower(currency_code) = lower(:token)
+                    OR lower(currency_symbol) = lower(:token)
+                    OR lower(currency_name) = lower(:token)
+                    OR lower(currency_name) LIKE lower('%' || :token || '%')
+                  )
+                ORDER BY
+                    CASE
+                        WHEN lower(currency_code) = lower(:token) THEN 1
+                        WHEN lower(currency_symbol) = lower(:token) THEN 2
+                        WHEN lower(currency_name) = lower(:token) THEN 3
+                        ELSE 4
+                    END,
+                    currency_code
+                LIMIT 1
+                """)
+                .bind("token", currencyToken)
+                .map((row, metadata) -> row.get("currency_code", String.class))
+                .one();
+    }
+
     private String baseSelect(ReferenceResource resource) {
         if (resource == ReferenceResource.SKILLS) {
             return """
@@ -278,17 +305,38 @@ public class ReferenceMasterR2dbcRepository implements ReferenceMasterRepository
                                     bindNullable(
                                             bindNullable(
                                                     bindNullable(
-                                                            bindNullable(spec, "shortName", valueOrNull(request.shortName()), String.class),
-                                                            "iso2Code", valueOrNull(request.iso2Code()), String.class),
-                                                    "iso3Code", valueOrNull(request.iso3Code()), String.class),
-                                            "phoneCode", valueOrNull(request.phoneCode()), String.class),
-                                    "nationalityName", valueOrNull(request.nationalityName()), String.class),
-                            "defaultCurrencyCode", valueOrNull(request.defaultCurrencyCode()), String.class),
-                    "defaultTimezone", valueOrNull(request.defaultTimezone()), String.class)
-                    .bind("gccFlag", request.gccFlag() != null && request.gccFlag());
-            case CURRENCIES -> bindNullable(spec, "currencySymbol", valueOrNull(request.shortName()), String.class)
+                                                            bindNullable(
+                                                                    bindNullable(
+                                                                            bindNullable(spec, "shortName", valueOrNull(request.shortName()), String.class),
+                                                                            "iso2Code", valueOrNull(request.iso2Code()), String.class),
+                                                                    "iso3Code", valueOrNull(request.iso3Code()), String.class),
+                                                            "phoneCode", valueOrNull(request.phoneCode()), String.class),
+                                                    "nationalityName", valueOrNull(request.nationalityName()), String.class),
+                                            "defaultCurrencyCode", valueOrNull(request.defaultCurrencyCode()), String.class),
+                                    "defaultTimezone", valueOrNull(request.defaultTimezone()), String.class),
+                            "nativeName", valueOrNull(request.nativeName()), String.class),
+                    "description", valueOrNull(request.description()), String.class)
+                    .bind("gccFlag", request.gccFlag() != null && request.gccFlag())
+                    .bind("rtlEnabled", request.rtlEnabled() != null && request.rtlEnabled());
+            case CURRENCIES -> bindNullable(
+                    bindNullable(
+                            bindNullable(spec, "currencySymbol", valueOrNull(request.shortName()), String.class),
+                            "shortDescription",
+                            valueOrNull(request.shortDescription()),
+                            String.class),
+                    "description",
+                    valueOrNull(request.description()),
+                    String.class)
                     .bind("decimalPlaces", request.decimalPlaces() == null ? 2 : request.decimalPlaces());
-            case LANGUAGES -> bindNullable(spec, "nativeName", valueOrNull(request.nativeName()), String.class)
+            case LANGUAGES -> bindNullable(
+                    bindNullable(
+                            bindNullable(spec, "nativeName", valueOrNull(request.nativeName()), String.class),
+                            "shortDescription",
+                            valueOrNull(request.shortDescription()),
+                            String.class),
+                    "description",
+                    valueOrNull(request.description()),
+                    String.class)
                     .bind("rtlEnabled", request.rtlEnabled() != null && request.rtlEnabled());
             case NATIONALITIES -> bindNullable(spec, "countryCode", valueOrNull(request.countryCode()), String.class)
                     .bind("gccNationalFlag", request.gccNationalFlag() != null && request.gccNationalFlag())
@@ -327,24 +375,24 @@ public class ReferenceMasterR2dbcRepository implements ReferenceMasterRepository
             case COUNTRIES -> """
                     INSERT INTO master_data.countries(
                         id, country_code, country_name, short_name, iso2_code, iso3_code, phone_code, nationality_name,
-                        default_currency_code, default_timezone, gcc_flag, active, created_by, updated_by
+                        default_currency_code, default_timezone, native_name, description, gcc_flag, rtl_enabled, active, created_by, updated_by
                     ) VALUES (
                         :id, :code, :name, :shortName, :iso2Code, :iso3Code, :phoneCode, :nationalityName,
-                        :defaultCurrencyCode, :defaultTimezone, :gccFlag, :active, :createdBy, :updatedBy
+                        :defaultCurrencyCode, :defaultTimezone, :nativeName, :description, :gccFlag, :rtlEnabled, :active, :createdBy, :updatedBy
                     ) RETURNING *
                     """;
             case CURRENCIES -> """
                     INSERT INTO master_data.currencies(
-                        id, currency_code, currency_name, currency_symbol, decimal_places, active, created_by, updated_by
+                        id, currency_code, currency_name, currency_symbol, short_description, description, decimal_places, active, created_by, updated_by
                     ) VALUES (
-                        :id, :code, :name, :currencySymbol, :decimalPlaces, :active, :createdBy, :updatedBy
+                        :id, :code, :name, :currencySymbol, :shortDescription, :description, :decimalPlaces, :active, :createdBy, :updatedBy
                     ) RETURNING *
                     """;
             case LANGUAGES -> """
                     INSERT INTO master_data.languages(
-                        id, language_code, language_name, native_name, rtl_enabled, active, created_by, updated_by
+                        id, language_code, language_name, native_name, short_description, description, rtl_enabled, active, created_by, updated_by
                     ) VALUES (
-                        :id, :code, :name, :nativeName, :rtlEnabled, :active, :createdBy, :updatedBy
+                        :id, :code, :name, :nativeName, :shortDescription, :description, :rtlEnabled, :active, :createdBy, :updatedBy
                     ) RETURNING *
                     """;
             case NATIONALITIES -> """
@@ -426,7 +474,10 @@ public class ReferenceMasterR2dbcRepository implements ReferenceMasterRepository
                         nationality_name = :nationalityName,
                         default_currency_code = :defaultCurrencyCode,
                         default_timezone = :defaultTimezone,
+                        native_name = :nativeName,
+                        description = :description,
                         gcc_flag = :gccFlag,
+                        rtl_enabled = :rtlEnabled,
                         active = :active,
                         updated_at = CURRENT_TIMESTAMP,
                         updated_by = :updatedBy
@@ -437,6 +488,8 @@ public class ReferenceMasterR2dbcRepository implements ReferenceMasterRepository
                         currency_code = :code,
                         currency_name = :name,
                         currency_symbol = :currencySymbol,
+                        short_description = :shortDescription,
+                        description = :description,
                         decimal_places = :decimalPlaces,
                         active = :active,
                         updated_at = CURRENT_TIMESTAMP,
@@ -448,6 +501,8 @@ public class ReferenceMasterR2dbcRepository implements ReferenceMasterRepository
                         language_code = :code,
                         language_name = :name,
                         native_name = :nativeName,
+                        short_description = :shortDescription,
+                        description = :description,
                         rtl_enabled = :rtlEnabled,
                         active = :active,
                         updated_at = CURRENT_TIMESTAMP,
@@ -669,6 +724,13 @@ public class ReferenceMasterR2dbcRepository implements ReferenceMasterRepository
 
     private String valueOrNull(String value) {
         return StringUtils.hasText(value) ? value.trim() : null;
+    }
+
+    private String resolveCode(ReferenceResource resource, ReferenceMasterUpsertRequest request) {
+        if (resource == ReferenceResource.COUNTRIES && StringUtils.hasText(request.countryCode())) {
+            return request.countryCode().trim();
+        }
+        return request.code().trim();
     }
 
     private <T> GenericExecuteSpec bindNullable(GenericExecuteSpec spec, String name, T value, Class<T> type) {

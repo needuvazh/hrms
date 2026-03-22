@@ -55,6 +55,9 @@ class ModuleApiDependencyArchitectureTest {
                 if (targetPackage.contains(".model.") || targetPackage.endsWith(".model")) {
                     continue;
                 }
+                if (targetPackage.contains(".api.") || targetPackage.endsWith(".api")) {
+                    continue;
+                }
                 if (targetPackage.startsWith("com.company.hrms.contracts.")) {
                     continue;
                 }

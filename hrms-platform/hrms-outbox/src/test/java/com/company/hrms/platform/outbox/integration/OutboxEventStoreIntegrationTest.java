@@ -5,6 +5,7 @@ import com.company.hrms.platform.outbox.domain.OutboxStoredEvent;
 import com.company.hrms.platform.outbox.infrastructure.R2dbcOutboxEventStore;
 import io.r2dbc.spi.ConnectionFactories;
 import io.r2dbc.spi.ConnectionFactory;
+import io.r2dbc.spi.ConnectionFactoryOptions;
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,12 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import reactor.test.StepVerifier;
 
+import static io.r2dbc.spi.ConnectionFactoryOptions.DATABASE;
+import static io.r2dbc.spi.ConnectionFactoryOptions.DRIVER;
+import static io.r2dbc.spi.ConnectionFactoryOptions.HOST;
+import static io.r2dbc.spi.ConnectionFactoryOptions.PASSWORD;
+import static io.r2dbc.spi.ConnectionFactoryOptions.PORT;
+import static io.r2dbc.spi.ConnectionFactoryOptions.USER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Testcontainers(disabledWithoutDocker = true)
@@ -30,11 +37,14 @@ class OutboxEventStoreIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        String r2dbcUrl = "r2dbc:postgresql://%s:%d/%s".formatted(
-                postgres.getHost(),
-                postgres.getFirstMappedPort(),
-                postgres.getDatabaseName());
-        ConnectionFactory connectionFactory = ConnectionFactories.get(r2dbcUrl + "?user=" + postgres.getUsername() + "&password=" + postgres.getPassword());
+        ConnectionFactory connectionFactory = ConnectionFactories.get(ConnectionFactoryOptions.builder()
+                .option(DRIVER, "postgresql")
+                .option(HOST, postgres.getHost())
+                .option(PORT, postgres.getFirstMappedPort())
+                .option(DATABASE, postgres.getDatabaseName())
+                .option(USER, postgres.getUsername())
+                .option(PASSWORD, postgres.getPassword())
+                .build());
         DatabaseClient databaseClient = DatabaseClient.create(connectionFactory);
 
         this.store = new R2dbcOutboxEventStore(databaseClient);

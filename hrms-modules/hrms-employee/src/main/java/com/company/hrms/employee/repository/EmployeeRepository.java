@@ -1,13 +1,11 @@
 package com.company.hrms.employee.repository;
 
-import com.company.hrms.employee.model.*;
-
+import com.company.hrms.employee.model.EmployeeDto;
 import java.util.UUID;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface EmployeeRepository {
-
     Mono<EmployeeDto> save(EmployeeDto employee);
 
     Mono<EmployeeDto> findById(UUID employeeId, String tenantId);

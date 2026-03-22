@@ -34,4 +34,6 @@ public interface ReferenceMasterRepository {
     Mono<Boolean> existsCurrencyCode(String currencyCode);
 
     Mono<Boolean> existsCountryCode(String countryCode);
+
+    Mono<String> resolveCurrencyCode(String currencyToken);
 }
